@@ -1,0 +1,32 @@
+{
+    "name": "superstani/myanimetv",
+    "type": "library",
+    "description": "MY ANIME TV",
+    "keywords": ["telegram", "bot", "api"],
+    "license": "MIT",
+    "homepage": "https://github.com/SuperStani/myanimetv",
+    "authors": [
+        {
+            "name": "Stanislav",
+            "email": "superstani.dev@gmail.com",
+            "role": "Creator"
+        }
+    ],
+
+    "autoload": {
+        "psr-4": {
+            "superbot\\App\\": "app/",
+            "superbot\\Telegram\\": "superbot/Telegram/"
+        }
+    },
+    
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "process-timeout": 3600
+    },
+    "require": {
+        "php-di/php-di": "^6.4"
+    }
+}

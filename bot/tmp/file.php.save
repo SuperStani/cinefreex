@@ -1,0 +1,9 @@
+<?php
+
+$conn = new PDO("mysql:host=localhost;dbname=netfluzbackup", "admin", "@Naruto96");
+
+$data = $conn->query("SELECT m.nome, m.stagione, m.id FROM movie INNER JOIN episodes e ON m.id = e.movie_id GROUP by m.id");
+var_dump($data);
+foreach($data as $movie) {
+	var_dump($movie);
+}
