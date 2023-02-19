@@ -8,9 +8,9 @@ use superbot\App\Controllers\UserController;
 
 class MessageController extends Controller
 {
-    protected $message;
-    protected $user;
-    protected $logger;
+    protected Message $message;
+    protected UserController $user;
+    protected Log $logger;
     
     public function __construct(
         Message $message,

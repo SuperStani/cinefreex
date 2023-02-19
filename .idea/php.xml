@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpIncludePathManager">
+    <include_path>
+      <path value="$PROJECT_DIR$/bot/vendor/php-di/phpdoc-reader" />
+      <path value="$PROJECT_DIR$/bot/vendor/php-di/invoker" />
+      <path value="$PROJECT_DIR$/bot/vendor/composer" />
+      <path value="$PROJECT_DIR$/bot/vendor/laravel/serializable-closure" />
+      <path value="$PROJECT_DIR$/bot/vendor/psr/container" />
+      <path value="$PROJECT_DIR$/bot/vendor/php-di/php-di" />
+      <path value="$PROJECT_DIR$/bot/vendor/symfony/deprecation-contracts" />
+      <path value="$PROJECT_DIR$/bot/vendor/psr/http-client" />
+      <path value="$PROJECT_DIR$/bot/vendor/psr/http-factory" />
+      <path value="$PROJECT_DIR$/bot/vendor/psr/http-message" />
+      <path value="$PROJECT_DIR$/bot/vendor/guzzlehttp/guzzle" />
+      <path value="$PROJECT_DIR$/bot/vendor/guzzlehttp/promises" />
+      <path value="$PROJECT_DIR$/bot/vendor/guzzlehttp/psr7" />
+      <path value="$PROJECT_DIR$/bot/vendor/ralouphie/getallheaders" />
+    </include_path>
+  </component>
+  <component name="PhpProjectSharedConfiguration" php_language_level="8.0">
+    <option name="suggestChangeDefaultLanguageLevel" value="false" />
+  </component>
+</project>

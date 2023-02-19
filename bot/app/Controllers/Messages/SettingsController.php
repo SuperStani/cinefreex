@@ -3,6 +3,7 @@
 namespace superbot\App\Controllers\Messages;
 
 use Exception;
+use superbot\App\Configs\MovieCategory;
 use superbot\App\Controllers\MessageController;
 use superbot\Telegram\Client;
 use superbot\App\Configs\GeneralConfigs as cfg;
@@ -13,26 +14,36 @@ use superbot\App\Storage\Repositories\MovieRepository;
 use superbot\Telegram\Message;
 use superbot\App\Controllers\UserController;
 use superbot\App\Storage\Repositories\EpisodeRepository;
+use \GuzzleHttp\Client as HttpClient;
 
 class SettingsController extends MessageController
 {
-    private $movieRepo;
-    private $genreRepo;
-    private $epRepo;
+    private MovieRepository $movieRepo;
+    private GenreRepository $genreRepo;
+    private EpisodeRepository $epRepo;
+
+    private HttpClient $httpClient;
+
     public function __construct(
         Message $message,
         UserController $user,
         MovieRepository $movieRepo,
         GenreRepository $genreRepo,
-        EpisodeRepository $epRepo
-    ) {
+        EpisodeRepository $epRepo,
+        HttpClient $httpClient
+    )
+    {
         $this->message = $message;
         $this->user = $user;
         $this->movieRepo = $movieRepo;
         $this->genreRepo = $genreRepo;
         $this->epRepo = $epRepo;
+        $this->httpClient = $httpClient;
     }
 
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function uploadEpisodes($id, $message_id)
     {
         Client::editMessageText($this->user->id, $message_id, null, "*Attendi sto recuperando le info del episodio..*", "Markdown");
@@ -44,15 +55,14 @@ class SettingsController extends MessageController
         $episode->setMovieId($id);
         $episode->setFileId(Client::copyMessage(cfg::$episodes_channel, $this->user->id, $this->message->id)->result->message_id);
         $this->message->delete();
-        //$episode->setUrl($ep);
         if ($movie->getCategory() == 'TVSERIES') {
             $url = cfg::$api_url . "?type=TVSERIES&episode=" . $episode->getNumber() . "&season=" . $movie->getSeason() . "&movie_id=" . $movie->getTmdbId();
-            $otherInfo = json_decode(file_get_contents($url));
+            $otherInfo = json_decode($this->httpClient->get($url)->getBody());
             $episode->setName($otherInfo->name);
             $episode->setPoster($otherInfo->poster);
             $episode->setSynopsis($otherInfo->synopsis);
-            $url = cfg::$domain . "/netfluzmax/photoshop/?pass=@Naruto96&saveEpisodePoster=1&fileName=" . $episode->getPoster() . "&source=" . cfg::$tmdb_photo_path  . $episode->getPoster();
-            file_get_contents($url);
+            $url = cfg::$domain . "/netfluzmax/photoshop/?pass=@Naruto96&saveEpisodePoster=1&fileName=" . $episode->getPoster() . "&source=" . cfg::$tmdb_photo_path . $episode->getPoster();
+            $this->httpClient->get($url);
         }
         $this->epRepo->add($episode);
 
@@ -73,18 +83,21 @@ class SettingsController extends MessageController
         Client::editMessageText($this->user->id, $message_id, null, "Modifica effettuata con successo!", "html", null, false, $keyboard);
     }
 
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function reloadInfo($id, $message_id, $add = 0)
     {
         if ($this->message->find("http")) {
             $movie = $this->movieRepo->getMovieSimpleById($id);
             $e = explode("/", $this->message->text);
             $movie_id = explode("-", end($e))[0];
-            $info = json_decode(file_get_contents(cfg::$api_url . '?type=' . $movie->getCategory() . '&movie_id=' . $movie_id . ($movie->getSeason() !== null ? '&season=' . $movie->getSeason() : '')));
+            $info = json_decode($this->httpClient->get(cfg::$api_url . '?type=' . $movie->getCategory() . '&movie_id=' . $movie_id . ($movie->getSeason() !== null ? '&season=' . $movie->getSeason() : ''))->getBody());
             $movie->setTmdbId($movie_id);
             $movie->setName($info->name);
             $movie->setAiredOn($info->air_date);
             $movie->setEpisodesNumber($info->episodes);
-            $poster = file_get_contents(cfg::$domain . "/netfluzmax/photoshop/?pass=@Naruto96&saveposter=1&source=" . $info->poster);
+            $poster = $this->httpClient->get(cfg::$domain . "/netfluzmax/photoshop/?pass=@Naruto96&saveposter=1&source=" . $info->poster)->getBody();
             $movie->setPoster($poster);
             $movie->setSynonyms("");
             $movie->setTrailer("#");
@@ -122,6 +135,9 @@ class SettingsController extends MessageController
         Client::editMessageText($this->user->id, $message_id, null, "Modifica effettuata con successo!", "html", null, false, $keyboard);
     }
 
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function poster($id, $message_id)
     {
         if (isset($this->message->photo)) {
@@ -129,8 +145,8 @@ class SettingsController extends MessageController
             $photo_to_delete = $movie->getPoster();
             unlink("/var/www/netfluzmax/img/$photo_to_delete.jpg");
             $photo_file_id = $this->message->photo[count($this->message->photo) - 1]->file_id;
-            $photo = "https://api.telegram.org/file/bot" . cfg::get("bot_token") . "/" . Client::getFile($photo_file_id)->result->file_path;
-            $poster = file_get_contents("https://xohosting.it/netfluzmax/photoshop/?pass=@Naruto96&saveposter=1&source=" . $photo);
+            $photo = "https://api.telegram.org/file/bot" . cfg::$bot_token . "/" . Client::getFile($photo_file_id)->result->file_path;
+            $poster = $this->httpClient->get("https://xohosting.it/netfluzmax/photoshop/?pass=@Naruto96&saveposter=1&source=" . $photo)->getBody();
             $movie->setPoster($poster);
             $this->movieRepo->Update($movie);
             $this->user->page();
@@ -178,8 +194,8 @@ class SettingsController extends MessageController
     public function newGroup($id, $message_id)
     {
         $this->message->delete();
-        $group = $this->conn->wquery("INSERT INTO groups_list SET name = ?", $this->message->text);
-        $this->conn->wquery("INSERT INTO movie_groups SET group_id = ?, movie = ?, viewOrder = (SELECT season FROM movie WHERE id = ?)", $group, $id, $id);
+        /*$group = $this->conn->wquery("INSERT INTO groups_list SET name = ?", $this->message->text);
+        $this->conn->wquery("INSERT INTO movie_groups SET group_id = ?, movie = ?, viewOrder = (SELECT season FROM movie WHERE id = ?)", $group, $id, $id);*/
         $this->user->page();
         $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Settings:group|$id"]];
         $keyboard["inline_keyboard"] = $menu;
@@ -223,13 +239,15 @@ class SettingsController extends MessageController
     }
 
 
+    /**
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
     public function simulcastBanner($id, $message_id, $first_time = 0)
     {
         $this->message->delete();
         $photo_file_id = $this->message->photo[count($this->message->photo) - 1]->file_id;
         $photo = "https://api.telegram.org/file/bot" . cfg::$bot_token . "/" . Client::getFile($photo_file_id)->result->file_path;
-        file_get_contents("https://xohosting.it/netfluzmax/photoshop/?pass=@Naruto96&saveSimulcastPoster=1&pass=@Naruto96" . "&fileName=" . $photo_file_id . "&source=" . $photo);
-        //$this->message->reply_photo(cfg::get('domain').'resources/img/'.$photo_file_id.'.jpg', 'anteprima');
+        $this->httpClient->get(cfg::$domain . "/netfluzmax/photoshop/?pass=@Naruto96&saveSimulcastPoster=1&pass=@Naruto96" . "&fileName=" . $photo_file_id . "&source=" . $photo);
         if ($first_time) {
             $movie = new Movie();
             $movie->setName("");
@@ -270,5 +288,64 @@ class SettingsController extends MessageController
             Client::editMessageText($this->user->id, $message_id, null, "Modifica effettuata con successo!", "html", null, false, $keyboard);
             $this->user->page();
         }
+    }
+
+    public function aired($id, $message_id)
+    {
+        $this->message->delete();
+        $movie = $this->movieRepo->getMovieSimpleById($id);
+        $movie->setAiredOn($this->message->text);
+        $this->movieRepo->Update($movie);
+        $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Settings:home|$id"]];
+        $keyboard["inline_keyboard"] = $menu;
+        Client::editMessageText($this->user->id, $message_id, null, "Modifica effettuata con successo!", "html", null, false, $keyboard);
+        $this->user->page();
+    }
+
+    public function sendPosterAndSend($id, $channel_id)
+    {
+        $this->message->delete();
+        $photo = end($this->message->photo);
+        $poster_id = $photo->file_id;
+        $photo_file_id_telegram_uri = "https://api.telegram.org/file/bot" . cfg::$bot_token . "/" . Client::getFile($poster_id)->result->file_path;
+        $final_poster = cfg::$photoshop_uri . "?posterOrizzontale=" . $photo_file_id_telegram_uri;
+        $movie = $this->movieRepo->getMovieSimpleById($id);
+        switch ($movie->getCategory()) {
+            case MovieCategory::TV_SERIES:
+                $text = get_string(
+                    'it',
+                    'channelTVSERIES',
+                    $movie->getName(),
+                    $movie->getParsedSeason(),
+                    $movie->getParsedGenres(),
+                    $movie->getAiredOn(),
+                    $movie->getEpisodesNumber(),
+                    $movie->getDuration(),
+                    $movie->getSynopsisUrl()
+                );
+                break;
+            default:
+                $text = get_string(
+                    'it',
+                    'channelFilm',
+                    $movie->getName(),
+                    $movie->getParsedGenres(),
+                    $movie->getAiredOn(),
+                    $movie->getDuration(),
+                    $movie->getSynopsisUrl()
+                );
+        }
+        $menu[] = [["text" => "🍿 𝗦𝗧𝗥𝗘𝗔𝗠𝗜𝗡𝗚 / 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗 🍿", "url" => "http://t.me/CodeToLinksBot?start=movie_" . $id]];
+        $menu[] = [
+            ["text" => "✉️ RICHIESTE", "url" => "https://t.me/NetfluzRobot"],
+            ["text" => "📝 TUTORIAL", "url" => "https://t.me/+FjXzQx6eStFhMDI8"]
+        ];
+        $menu[] = [
+            ["text" => "🎞 LISTA SERIE", "url" => "http://t.me/NetfluzRobot?start=listaserie"],
+            ["text" => "🎬 LISTA FILM", "url" => "http://t.me/NetfluzRobot?start=listafilm"]
+        ];
+        $menu[] = [["text" => "👤 INVITA UN AMICO", "url" => "https://telegram.me/share/url?url=https://t.me/Netfluz_Official"]];
+        $this->message->reply("Movie inviato con successo!", [[["text" => get_button('it', 'back'), "callback_data" => "Settings:home|$id"]]]);
+        return Client::sendPhoto($channel_id, $final_poster, $text, $menu, 'html');;
     }
 }

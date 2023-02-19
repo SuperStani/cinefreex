@@ -14,15 +14,17 @@ use superbot\Telegram\Query as QueryUpdate;
 class SettingsController extends QueryController
 {
 
-    private $movieRepo;
+    private MovieRepository $movieRepo;
     private $cacheService;
-    private $genreRepo;
+    private GenreRepository $genreRepo;
+
     public function __construct(
         QueryUpdate $query,
         UserController $user,
         MovieRepository $movieRepo,
         GenreRepository $genreRepo
-    ) {
+    )
+    {
         $this->query = $query;
         $this->user = $user;
         $this->movieRepo = $movieRepo;
@@ -125,7 +127,7 @@ class SettingsController extends QueryController
         if (count($group)) {
             $text = "";
             foreach ($group as $movie) {
-                $name = $movie->getName() . " " .  $movie->getParsedSeason();
+                $name = $movie->getName() . " " . $movie->getParsedSeason();
                 if ($movie->getId() == $id)
                     $name = "<b>$name</b>";
                 $text = $text . "<a href='t.me/myMovietvbetabot?start=Movie_" . $movie->getId() . "'>$name</a> <i>[" . $movie->getViewOrder() . "]</i>\n";
@@ -160,7 +162,7 @@ class SettingsController extends QueryController
     {
         $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Settings:group|$id"]];
         $this->user->page("Settings:orderView|$id|{$this->query->message->id}");
-        return $this->query->message->edit("<b>Ok, invia l'ordine di visualizzazione dell'Movie</b>", $menu, 'HTML');
+        return $this->query->message->edit("<b>Ok, invia l'ordine di visualizzazione del movie</b>", $menu, 'HTML');
     }
 
     public function deleteFromGroup($id, $confirm)
@@ -265,6 +267,20 @@ class SettingsController extends QueryController
         return $this->query->message->edit("Seleziona i generi:", $menu);
     }
 
+    public function sendMovie($id)
+    {
+        $menu[] = [["text" => "NETFLUZ", "callaback_data" => "Settings:selectChannelToSend|$id|-1001115765309"]];
+        $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Settings:home|$id"]];
+        $this->user->page();
+        return $this->query->message->edit("Seleziona il canale:", $menu);
+    }
+
+    public function selectChannelToSend($id, $channel_id)
+    {
+        $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Settings:sendMovie|$id"]];
+        $this->user->page("Settings:sendPosterAndSend|$id|$channel_id");
+        return $this->query->message->edit("Invia il poster:", $menu);
+    }
 
 
     public function close()

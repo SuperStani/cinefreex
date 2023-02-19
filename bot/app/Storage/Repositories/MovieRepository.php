@@ -126,8 +126,7 @@ class MovieRepository
                     trailer,
                     poster,
                     episodes,
-                    duration,
-                    episode_poster
+                    duration
                 FROM movie
                 WHERE id = ?
             ";
@@ -146,7 +145,6 @@ class MovieRepository
             $movie->setSynopsisUrl($result->synopsis_url);
             $movie->setTrailer($result->trailer);
             $movie->setDuration($result->duration);
-            $movie->setEpisodePoster($result->episode_poster);
             $this->cacheService->saveMovieSimple($movie);
         }
         return $movie;
@@ -330,8 +328,7 @@ class MovieRepository
                 category = ?,
                 season = ?,
                 trailer = ?,
-                duration = ?,
-                episode_poster = ?
+                duration = ?
             WHERE id = ?
         ";
         $this->conn->wquery(
@@ -348,9 +345,9 @@ class MovieRepository
             $movie->getSeason(),
             $movie->getTrailer(),
             $movie->getDuration(),
-            $movie->getEpisodePoster(),
             $movie->getId(),
         );
+        return $movie->getId();
     }
 
     public function deleteMovieById($id)

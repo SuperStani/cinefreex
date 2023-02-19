@@ -4,26 +4,25 @@ namespace superbot\App\Storage\Entities;
 
 class Movie
 {
-    private $id;
-    private $tmdb_id;
-    private $name;
-    private $synonyms;
-    private $poster;
-    private $episodesNumber;
-    private $trailer;
-    private $synopsis;
-    private $synopsisUrl;
-    private $genres;
-    private $category;
-    private $airedOn;
-    private $season;
-    private $duration;
+    private ?int $id;
+    private ?int $tmdb_id;
+    private ?string $name;
+    private ?string $synonyms;
+    private ?string $poster;
+    private ?int $episodesNumber;
+    private ?string $trailer;
+    private ?string $synopsis;
+    private ?string $synopsisUrl;
+    private ?array $genres;
+    private ?string $category;
+    private ?string $airedOn;
+    private ?int $season;
+    private ?int $duration;
     private $topRank;
     private $vote;
-    private $totalVotes;
-    private $views;
-    private $viewOrder;
-    private $episodePoster;
+    private ?int $totalVotes;
+    private ?int $views;
+    private ?int $viewOrder;
 
     public function __construct()
     {
@@ -244,8 +243,4 @@ class Movie
         $this->episodePoster = $poster;
     }
 
-    public function getEpisodePoster(): ?string
-    {
-        return $this->episodePoster;
-    }
 }

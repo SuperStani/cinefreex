@@ -27,6 +27,8 @@
         "process-timeout": 3600
     },
     "require": {
-        "php-di/php-di": "^6.4"
+        "php-di/php-di": "^6.4",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^7.0"
     }
 }

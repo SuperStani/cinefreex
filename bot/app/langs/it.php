@@ -134,5 +134,24 @@ $it = [
     ],
     "sponsor" => [
         "*🔐 PER SBLOCCARE L'UTILIZZO DEL BOT ISCRIVITI AI CANALI QUI SOTTO ✅👇👇*"
+    ],
+
+    "channelFilm" => [
+        "<b>Titolo</b>: %s",
+        "",
+        "⭐️ | <b>Genere</b>: %s",
+        "🗓 | <b>Data</b>: %s",
+        "⏱ | <b>Durata</b>: %smin",
+        "📖 | <b>Trama</b>: <a href='%s'>Clicca qui</a>"
+    ],
+    "channelTVSERIES" => [
+        "<b>Titolo</b>: %s",
+        "➥ <i>%s</i>",
+        "",
+        "⭐️ | <b>Genere</b>: %s",
+        "🗓 | <b>Data</b>: %s",
+        "➕ | <b>Episodi</b>: ",
+        "⏱ | <b>Durata</b>: %smin",
+        "📖 | <b>Trama</b>: <a href='%s'>Clicca qui</a>"
     ]
 ];
