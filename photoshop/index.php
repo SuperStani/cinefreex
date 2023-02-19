@@ -1,8 +1,9 @@
 <?php
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
 use Intervention\Image\ImageManagerStatic as Image;
 define("PHOTO_PATH", "/var/www/cinefreex/img/");
+define("LAYOUTS_PATH", "/scripts/cinefreex/photoshop/img");
 
 if(isset($_GET["saveposter"], $_GET["source"], $_GET["pass"]) && $_GET["pass"] == '@Naruto96') {
     $main = Image::canvas(794, 1123, "#ff0000");
@@ -10,27 +11,27 @@ if(isset($_GET["saveposter"], $_GET["source"], $_GET["pass"]) && $_GET["pass"] =
     $main->insert($img, "center");
     $fileName = generateFileName();
     //echo $main->response();
-    $main->save(NETFLUZ_PATH . $fileName . ".jpg");
+    $main->save(PHOTO_PATH . $fileName . ".jpg");
     echo $fileName;
     die;
 }
 
 if(isset($_GET["saveEpisodePoster"], $_GET["source"], $_GET["pass"]) && $_GET["pass"] == '@Naruto96') {
     $img = Image::make($_GET["source"])->widen(1123);
-    $img->save(NETFLUZ_PATH . "episodes/" . str_replace("/", "" , $_GET["fileName"]));
+    $img->save(PHOTO_PATH . "episodes/" . str_replace("/", "" , $_GET["fileName"]));
     die;
 }
 
 if(isset($_GET["saveSimulcastPoster"], $_GET["source"], $_GET["pass"]) && $_GET["pass"] == '@Naruto96') {
     $img = Image::make($_GET["source"])->widen(1123);
-    $img->save(NETFLUZ_PATH . "simulcasts/" . str_replace("/", "" , $_GET["fileName"]) . ".jpg");
+    $img->save(PHOTO_PATH . "simulcasts/" . str_replace("/", "" , $_GET["fileName"]) . ".jpg");
     die;
 }
 
 if(isset($_GET["poster"])) {
-    $img = NETFLUZ_PATH . $_GET["poster"] . ".jpg";
+    $img = PHOTO_PATH . $_GET["poster"] . ".jpg";
     $main = Image::make($img);
-    $logo = Image::make(__DIR__ . "/cornice.png")->widen(794);
+    $logo = Image::make(LAYOUTS_PATH . . "/cornice.png")->widen(794);
     //$name = $_GET["name"];
     $main->insert($logo, "center");
     echo $main->response();
@@ -40,7 +41,7 @@ if(isset($_GET["poster"])) {
 if(isset($_GET["posterOrizzontale"])) {
     $img = $_GET["posterOrizzontale"];
     $main = Image::make($img)->widden(1123);
-    $logo = Image::make(__DIR__ . "/LayoutOrizzontale.png")->widen(1123);
+    $logo = Image::make(LAYOUTS_PATH . "/LayoutOrizzontale.png")->widen(1123);
     //$name = $_GET["name"];
     $main->insert($logo, "center");
     echo $main->response();
