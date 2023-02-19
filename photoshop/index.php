@@ -31,7 +31,7 @@ if(isset($_GET["saveSimulcastPoster"], $_GET["source"], $_GET["pass"]) && $_GET[
 if(isset($_GET["poster"])) {
     $img = PHOTO_PATH . $_GET["poster"] . ".jpg";
     $main = Image::make($img);
-    $logo = Image::make(LAYOUTS_PATH . . "/cornice.png")->widen(794);
+    $logo = Image::make(LAYOUTS_PATH . "/cornice.png")->widen(794);
     //$name = $_GET["name"];
     $main->insert($logo, "center");
     echo $main->response();
@@ -40,13 +40,15 @@ if(isset($_GET["poster"])) {
 
 if(isset($_GET["posterOrizzontale"])) {
     $img = $_GET["posterOrizzontale"];
-    $main = Image::make($img)->widden(1123);
-    $logo = Image::make(LAYOUTS_PATH . "/LayoutOrizzontale.png")->widen(1123);
-    //$name = $_GET["name"];
+    $main = Image::canvas(1280, 700, "#fffff");
+    $img = Image::make($img)->heighten(700);
+    $logo = Image::make(LAYOUTS_PATH . "/LayoutOrizzontale.png")->widen(1280);
+    $main->insert($img, "center");
     $main->insert($logo, "center");
     echo $main->response();
     die;
 }
+
 
 function generateFileName() {
     $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
