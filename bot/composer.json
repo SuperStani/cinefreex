@@ -1,7 +1,7 @@
 {
-    "name": "superstani/myanimetv",
+    "name": "superstani/cinefreex",
     "type": "library",
-    "description": "MY ANIME TV",
+    "description": "cinefreex",
     "keywords": ["telegram", "bot", "api"],
     "license": "MIT",
     "homepage": "https://github.com/SuperStani/myanimetv",

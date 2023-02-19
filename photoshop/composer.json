@@ -1,0 +1,26 @@
+{
+  "name": "superstani/photoshop",
+  "type": "library",
+  "description": "photoshop ",
+  "keywords": ["telegram", "bot", "api"],
+  "license": "MIT",
+  "homepage": "https://github.com/SuperStani/myanimetv",
+  "authors": [
+    {
+      "name": "Stanislav",
+      "email": "superstani.dev@gmail.com",
+      "role": "Creator"
+    }
+  ],
+
+  "config": {
+    "optimize-autoloader": true,
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "process-timeout": 3600
+  },
+
+  "require": {
+    "intervention/image": "^3"
+  }
+}
