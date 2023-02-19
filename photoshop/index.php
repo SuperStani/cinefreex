@@ -2,7 +2,7 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use Intervention\Image\ImageManagerStatic as Image;
-define("NETFLUZ_PATH", "/var/www/netfluzmax/img/");
+define("PHOTO_PATH", "/var/www/cinefreex/img/");
 
 if(isset($_GET["saveposter"], $_GET["source"], $_GET["pass"]) && $_GET["pass"] == '@Naruto96') {
     $main = Image::canvas(794, 1123, "#ff0000");
