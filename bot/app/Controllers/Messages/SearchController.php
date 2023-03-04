@@ -8,18 +8,19 @@ use superbot\App\Logger\Log;
 use superbot\Telegram\Message;
 use superbot\App\Controllers\UserController;
 use superbot\App\Storage\Repositories\MovieRepository;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\SearchCategory;
 
 class SearchController extends MessageController
 {
-    protected $movieRepo;
-    
+    protected MovieRepository $movieRepo;
+
     public function __construct(
         Message $message,
         UserController $user,
         MovieRepository $movieRepo,
         Log $logger
-    ) {
+    )
+    {
         $this->message = $message;
         $this->user = $user;
         $this->logger = $logger;
@@ -30,25 +31,34 @@ class SearchController extends MessageController
     {
         if ($message_id != null)
             Client::deleteMessage($this->user->id, $message_id);
-        $results = $this->movieRepo->getTotalSearchResultsByName($this->message->text);
+        $results = $this->movieRepo->searchMoviesbyNameOrSynonyms($this->message->text, 0);
 
-        if ($results["tvseries"] == 0 && $results["films"] == 0) {
+        if (count($results) == 0) {
             $this->message->reply("Non ho trovato niente!");
             die;
         }
 
-        //$search = $this->user->saveSearch("BY_NAME", $this->message->text);
-        $q = urlencode($this->message->text);
-        if ($results["tvseries"] != 0) {
-            $menu[0][] = ["text" =>  "TV SERIES ($results[tvseries])", "web_app" => ["url" => cfg::$webapp . "/search/{$this->user->id}/TVSERIES/{$q}"]];
-        }
+        $search_id = $this->user->saveSearch(SearchCategory::BY_NAME, $this->message->text);
 
-        if ($results["films"] != 0) {
-            $menu[0][] = ["text" => "FILMS ($results[films])", "web_app" => ["url" => cfg::$webapp . "/search/{$this->user->id}/FILM/{$q}"]];
+        $text = null;
+        $x = $y = 0;
+        $emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+        foreach ($results as $key => $movie) {
+            if ($key == 10) {
+                $menu[] = [["text" => "»»»", "callback_data" => "Search:q|$search_id|10"]];
+                continue;
+            }
+            $key = $emoji[$key];
+            $text .= $key . " | *" . $movie->getName() . " " . $movie->getParsedSeason() . "*\n";
+            if ($x < 5) $x++;
+            else {
+                $x = 1;
+                $y++;
+            }
+            $menu[$y][] = ["text" => $key, "callback_data" => "Movie:view|{$movie->getId()}|1"];
         }
-
-        $text = get_string("it", "search_results", $this->message->text, $results["films"], $results["tvseries"]);
-        $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Search:home|1"]];
+        $text .= "\nRisultati per « *{$this->message->text}* »";
+        $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Search:home|1"]];
         $this->message->reply($text, $menu);
         $this->message->delete();
     }

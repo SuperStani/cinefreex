@@ -3,7 +3,7 @@
 namespace superbot\App\Controllers\Query;
 
 use superbot\App\Controllers\QueryController;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\Telegram\Client;
 use superbot\App\Controllers\UserController;
 use superbot\App\Storage\Repositories\MovieRepository;
@@ -26,7 +26,7 @@ class ProfileController extends QueryController
 
     public function me($delete_message)
     {
-        $webapp = cfg::$webapp . "/watchlist";
+        $webapp = GeneralConfigs::WEBAPP_URI. "/watchlist";
         $total_films = $this->user->getTotalMoviesWatched(); //$this->conn->rquery("SELECT COUNT(*) AS tot FROM movie a INNER JOIN movie_watchlists aw ON a.id = aw.movie WHERE aw.user = ? AND aw.list = 1  AND a.season < 2 AND a.category <> 'Movie'", $this->user->id)->tot;
         $total_tvseries =  $this->user->getTotalTvSeriesWatched(); //$this->conn->rquery("SELECT COUNT(*) AS tot FROM movie a INNER JOIN movie_watchlists aw ON a.id = aw.movie WHERE aw.user = ? AND aw.list = 1  AND a.season < 2 AND a.category = 'Movie'", $this->user->id)->tot;
         $episodes = $this->user->getTotalEpisodesWatched(); //$this->conn->rquery("SELECT COUNT(*) AS tot, SUM(e.duration) as tot_duration FROM episodes e INNER JOIN movie_watchlists aw ON e.movie = aw.movie WHERE aw.user = ? AND aw.list = 1", $this->user->id);

@@ -4,7 +4,8 @@ namespace superbot\App\Services;
 
 use superbot\App\Storage\DB;
 use superbot\Telegram\Client;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
+
 class BroadcastService
 {
     private $id;
@@ -26,8 +27,8 @@ class BroadcastService
     {
         if($message == 'start') {
             $message = str_replace("{MENTION}", "su Netfluz", $this->cacheService->getStartMessage());
-            $menu[] = [["text" => '🍿 GUARDA SERIE / FILM 🍿', "web_app" => ["url" => cfg::$webapp . "/home"]]];
-            $menu[] = [["text" => "🔎 RICERCA", "callback_data" => "Search:home|0"], ["text" => "🔝 CLASSIFICA", "web_app" => ["url" => cfg::$webapp . "/leadership"]]];
+            $menu[] = [["text" => '🍿 GUARDA SERIE / FILM 🍿', "web_app" => ["url" => GeneralConfigs::WEBAPP_URI. "/home"]]];
+            $menu[] = [["text" => "🔎 RICERCA", "callback_data" => "Search:home|0"], ["text" => "🔝 CLASSIFICA", "web_app" => ["url" => GeneralConfigs::WEBAPP_URI. "/leadership"]]];
             $menu[] = [["text" => "➖➖➖➖➖➖➖➖", "callback_data" => "Home:null"]];
             $menu[] = [["text" => '✉️ RICHIESTE', "callback_data" => 'Home:request'], ["text" => "🗣 PROFILO", "callback_data" => "Profile:me|0"]];
             $menu[] = [["text" => "📝 TUTORIAL", "url" => "https://t.me/+FjXzQx6eStFhMDI8"], ["text" => '⛑️ STAFF ', "url" => "t.me/NetfluzSegnalazioniBOT"]];

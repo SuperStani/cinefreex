@@ -4,7 +4,6 @@ namespace superbot\App\Controllers\Messages;
 
 use superbot\App\Controllers\MessageController;
 use superbot\Telegram\Client;
-use superbot\App\Configs\GeneralConfigs as cfg;
 use superbot\App\Storage\Entities\Movie;
 use superbot\App\Storage\Repositories\GenreRepository;
 use superbot\App\Storage\Repositories\MovieRepository;

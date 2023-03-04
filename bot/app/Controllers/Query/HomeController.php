@@ -3,7 +3,7 @@
 namespace superbot\App\Controllers\Query;
 
 use superbot\App\Controllers\QueryController;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\Telegram\Query as QueryUpdate;
 use superbot\App\Controllers\UserController;
 use superbot\App\Logger\Log;
@@ -30,15 +30,14 @@ class HomeController extends QueryController
         $this->cacheService = $cacheService;
     }
 
-    public function start()
+    public function start($delete = false)
     {
         $this->user->page();
         if ($this->user->isAdmin()) {
             $menu[] = [["text" => "➕ ADD NEW MOVIE", "callback_data" => "Post:new"]];
-            $menu[] = [["text" => "📊 STATISTICHE", "web_app" => ["url" => cfg::$webapp . "/stats"]], ["text" => get_button('it', 'broadcast'), "callback_data" => "Home:broadcast"]];
+            $menu[] = [["text" => "📊 STATISTICHE", "web_app" => ["url" => GeneralConfigs::WEBAPP_URI . "/stats"]], ["text" => get_button('it', 'broadcast'), "callback_data" => "Home:broadcast"]];
         }
-        $menu[] = [["text" => get_button('it', 'watch_movie'), "web_app" => ["url" => cfg::$webapp . "/home"]]];
-        $menu[] = [["text" => get_button('it', 'search'), "callback_data" => "Search:home|0"], ["text" => get_button('it', 'top'), "web_app" => ["url" => cfg::$webapp . "/leadership"]]];
+        $menu[] = [["text" => get_button('it', 'watch_movie'), "callback_data" => "Simulcast:home"]];
         $menu[] = [["text" => "➖➖➖➖➖➖➖➖", "callback_data" => "Home:null"]];
         $menu[] = [["text" => get_button('it', 'requests'), "callback_data" => 'Home:request'], ["text" => get_button('it', 'profile'), "callback_data" => "Profile:me|0"]];
         $menu[] = [["text" => get_button('it', 'tutorial'), "url" => "https://t.me/+FjXzQx6eStFhMDI8"], ["text" => get_button('it', 'feedbacks'), "url" => "t.me/NetfluzSegnalazioniBOT"]];
@@ -55,7 +54,12 @@ class HomeController extends QueryController
             $this->cacheService->setStartMessage($text);
         }
         $text = str_replace("{MENTION}", $this->user->mention, $text);
-        return $this->query->message->edit($text, $menu);
+        if(!$delete) {
+            return $this->query->message->edit($text, $menu);
+        } else {
+            $this->query->message->delete();
+            return $this->query->message->reply($text, $menu);
+        }
     }
 
     public function request()

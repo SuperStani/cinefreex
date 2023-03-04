@@ -174,25 +174,22 @@ class MovieRepository
                 WHERE tmdb_id = ?
             ";
             $result = $this->conn->rquery($query, $id);
-            if(!isset($result->id)) {
-                return new Movie();
-            }
             $movie = new Movie();
-            $movie->setId($result->id);
-            $movie->setTmdbId($result->tmdb_id);
-            $movie->setName($result->name);
-            $movie->setPoster($result->poster);
-            $movie->setSynonyms($result->synonyms);
-            $movie->setCategory($result->category);
-            $movie->setEpisodesNumber($result->episodes);
-            $movie->setSeason($result->season);
-            $movie->setAiredOn($result->aired_on);
-            $movie->setSynopsis($result->synopsis);
-            $movie->setSynopsisUrl($result->synopsis_url);
-            $movie->setTrailer($result->trailer);
-            $movie->setDuration($result->duration);
-            $movie->setEpisodePoster($result->episode_poster);
-            
+            $movie->setId($result->id ?? null);
+            $movie->setTmdbId($result->tmdb_id ?? null);
+            $movie->setName($result->name ?? null);
+            $movie->setPoster($result->poster ?? null);
+            $movie->setSynonyms($result->synonyms ?? null);
+            $movie->setCategory($result->category ?? null);
+            $movie->setEpisodesNumber($result->episodes ?? null);
+            $movie->setSeason($result->season ?? null);
+            $movie->setAiredOn($result->aired_on ?? null);
+            $movie->setSynopsis($result->synopsis ?? null);
+            $movie->setSynopsisUrl($result->synopsis_url ?? null);
+            $movie->setTrailer($result->trailer ?? null);
+            $movie->setDuration($result->duration ?? null);
+            $movie->setEpisodePoster($result->episode_poster ?? null);
+
         }
         return $movie;
     }
@@ -211,12 +208,11 @@ class MovieRepository
         return $this->conn->rquery($query, $movie_id)->tot;
     }
 
-    public function searchMoviesbyNameOrSynopsys($q, $category, $offset = 0, $limit = 10): array
+    public function searchMoviesbyNameOrSynonyms($q, $offset = 0, $limit = 10): array
     {
-        $query = "SELECT * FROM " . self::$table . " WHERE category = ? AND name LIKE ? OR synonyms LIKE ? LIMIT ?, ?";
+        $query = "SELECT * FROM " . self::$table . " WHERE name LIKE ? OR synonyms LIKE ? LIMIT ?, ?";
         $results = $this->conn->rqueryALl(
             $query,
-            $category,
             '%' . $q . '%',
             '%' . $q . '%',
             $offset,
@@ -360,10 +356,10 @@ class MovieRepository
         $this->conn->wquery("DELETE FROM movie_genres WHERE movie = ?", $id);
         $this->conn->wquery("DELETE FROM movie_history WHERE movie = ?", $id);
         $movie = $this->getMovieSimpleById($id);
-        unlink("/var/www/netfluzmax/img/" . $movie->getPoster() . ".jpg");
+        unlink("/var/www/cinefreex/img/" . $movie->getPoster() . ".jpg");
         $episodes = $this->getEpisodesByMovieId($id);
         foreach ($episodes as $e) {
-            unlink("/var/www/netfluzmax/img/episodes/" . $e->getPoster());
+            unlink("/var/www/cinefreex/img/episodes/" . $e->getPoster());
         }
         $this->conn->wquery("DELETE FROM episodes WHERE movie = ?", $id);
         $this->conn->wquery("DELETE FROM movie WHERE id = ?", $id);
@@ -378,7 +374,7 @@ class MovieRepository
     {
         $poster = $this->conn->rquery("SELECT poster FROM movie_simulcasts WHERE movie = ?", $id)->poster;
         $this->conn->wquery("DELETE FROM movie_simulcasts WHERE movie = ?", $id);
-        unlink("/var/www/netfluzmax/img/simulcasts/" . $poster . ".jpg");
+        unlink("/var/www/cinefreex/img/simulcasts/" . $poster . ".jpg");
     }
 
     public function voteMovieById($id, $vote, $user_id)
@@ -571,6 +567,16 @@ class MovieRepository
     public function getSimulcastByMovieId($id): ?Movie
     {
         $res = $this->conn->rquery("SELECT name, poster, movie FROM movie_simulcasts WHERE movie = ?", $id);
+        $movie = new Movie();
+        $movie->setName($res->name);
+        $movie->setPoster($res->poster);
+        $movie->setId($res->movie);
+        return $movie;
+    }
+
+    public function getSimulcastByOffset($id): ?Movie
+    {
+        $res = $this->conn->rquery("SELECT name, poster, movie FROM movie_simulcasts LIMIT ?, 1", $id);
         $movie = new Movie();
         $movie->setName($res->name);
         $movie->setPoster($res->poster);

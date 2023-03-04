@@ -3,7 +3,6 @@
 namespace superbot\App\Controllers\Query;
 
 use superbot\App\Controllers\QueryController;
-use superbot\App\Configs\GeneralConfigs as cfg;
 use superbot\Telegram\Client;
 use superbot\App\Controllers\UserController;
 use superbot\App\Storage\Repositories\MovieRepository;

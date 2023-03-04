@@ -3,7 +3,7 @@
 namespace superbot\App\Controllers\Query;
 
 use superbot\App\Controllers\QueryController;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\Telegram\Client;
 use superbot\App\Controllers\UserController;
 use superbot\App\Logger\Log;
@@ -58,8 +58,8 @@ class MovieController extends QueryController
 
         if ($movie->getCategory() == "FILM") {
             $episode = $this->movieRepo->getEpisodesByMovieId($id)[0] ?? null;
-            if($episode !== null) {
-                if($episode->getFileId() !== 0) {
+            if ($episode !== null) {
+                if ($episode->getFileId() !== 0) {
                     $menu[] = [["text" => "▶️ GUARDA ORA ", "callback_data" => "Player:play|$id|1|1"]];
                 } else {
                     $menu[] = [["text" => "▶️ GUARDA ORA ", "url" => $episode->getUrl() ?? "t.me/netfluzrobot"]];
@@ -76,9 +76,9 @@ class MovieController extends QueryController
 
         $group = $this->movieRepo->getGroupByMovieId($id);
         if ($group !== null)
-            $menu[] = [["text" => get_button('it', 'correlated'), "web_app" => ["url" => cfg::$webapp  . "/movie/{$id}/correlated"]], ["text" => get_button('it', 'similar1'), "web_app" => ["url" => cfg::$webapp  . "/movie/{$id}/similar/{$movie->getCategory()}"]]];
+            $menu[] = [["text" => get_button('it', 'correlated'), "web_app" => ["url" => GeneralConfigs::WEBAPP_URI . "/movie/{$id}/correlated"]], ["text" => get_button('it', 'similar1'), "web_app" => ["url" => GeneralConfigs::WEBAPP_URI . "/movie/{$id}/similar/{$movie->getCategory()}"]]];
         else
-            $menu[] = [["text" => get_button('it', 'similar'), "web_app" => ["url" => cfg::$webapp  . "/movie/{$id}/similar/{$movie->getCategory()}"]]];
+            $menu[] = [["text" => get_button('it', 'similar'), "web_app" => ["url" => GeneralConfigs::WEBAPP_URI . "/movie/{$id}/similar/{$movie->getCategory()}"]]];
         $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Search:home|1"]];
 
         if ($movie->getCategory() == 'FILM') {
@@ -115,12 +115,12 @@ class MovieController extends QueryController
         $text .= ($this->user->isAdmin()) ? "\n\nℹ️ | <b>ID:</b> " . $movie->getId() : '';
         if ($delete_message !== null) {
             $this->query->message->delete();
+            if ($refresh) {
+                return $this->query->message->edit_media($this->query->message->photo[0]->file_id, $text, $menu, 'photo', 'html');
+            }
         }
-        if ($refresh) {
-            return $this->query->message->edit_media($this->query->message->photo[0]->file_id, $text, $menu, 'photo', 'html');
-        }
-        $res = Client::sendPhoto($this->user->id, cfg::$photo_path . $movie->getPoster(), $text, $menu, 'html');
-        if(!isset($res->result) && $this->user->isAdmin()) {
+        $res = Client::sendPhoto($this->user->id, GeneralConfigs::POSTER_PHOTO_URI . $movie->getPoster(), $text, $menu, 'html');
+        if (!isset($res->result) && $this->user->isAdmin()) {
             $settings[] = [["text" => "⚙️", "callback_data" => "Settings:home|{$movie->getId()}"]];
             Client::debug($res, $movie->getId());
             $this->query->message->reply("Qualcosa è andato storto con l'apertura del movie", $settings);
@@ -165,10 +165,10 @@ class MovieController extends QueryController
         }
         $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Movie:view|$id|1"]];
         if ($delete_message === null) {
-            $this->query->message->edit_media(cfg::$photo_path . $moviePoster, "*Seleziona il numero dell'episodio ⤵️*", $menu);
+            $this->query->message->edit_media(GeneralConfigs::POSTER_PHOTO_URI . $moviePoster, "*Seleziona il numero dell'episodio ⤵️*", $menu);
         } else {
             $this->query->message->delete();
-            $this->query->message->reply_photo(cfg::$photo_path . $moviePoster, "*Seleziona il numero dell'episodio ⤵️*", $menu);
+            $this->query->message->reply_photo(GeneralConfigs::POSTER_PHOTO_URI . $moviePoster, "*Seleziona il numero dell'episodio ⤵️*", $menu);
         }
     }
 
@@ -181,6 +181,6 @@ class MovieController extends QueryController
         foreach (($similar = $this->movieRepo->getSimilarMovie($movie)) as $m) {
             $caption .= "\n" . "➥ [" . $m->getName() . " " . $m->getParsedSeason() . "]" . "(https://t.me/myanimetvbetabot?start=movieID_" . $m->getId() . ")";
         }
-        return $this->query->message->edit_media(cfg::$photo_path . $movie->getPoster(), $caption, $menu);
+        return $this->query->message->edit_media(GeneralConfigs::POSTER_PHOTO_URI . $movie->getPoster(), $caption, $menu);
     }
 }

@@ -3,7 +3,7 @@
 namespace superbot\App\Controllers\Query;
 
 use superbot\App\Controllers\QueryController;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\Telegram\Client;
 use superbot\App\Controllers\UserController;
 use superbot\App\Logger\Log;
@@ -120,7 +120,7 @@ class PlayerController extends QueryController
                 if ($episodeI->getFileId() === 0) {
                     return $this->query->message->reply($caption, $menu);
                 } {
-                    $res = Client::copyMessage($this->user->id, cfg::$episodes_channel, $episodeI->getFileId(), $caption, $menu, 'Markdown');
+                    $res = Client::copyMessage($this->user->id, GeneralConfigs::CHANNEL_EPISODES, $episodeI->getFileId(), $caption, $menu, 'Markdown');
                     if ($this->user->isAdmin() && !$res->ok) {
                         Client::debug($res);
                     }

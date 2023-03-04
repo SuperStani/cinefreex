@@ -6,7 +6,7 @@ use Exception;
 use superbot\App\Configs\MovieCategory;
 use superbot\App\Controllers\MessageController;
 use superbot\Telegram\Client;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\App\Storage\Entities\Movie;
 use superbot\App\Storage\Entities\Episode;
 use superbot\App\Storage\Repositories\GenreRepository;
@@ -15,6 +15,7 @@ use superbot\Telegram\Message;
 use superbot\App\Controllers\UserController;
 use superbot\App\Storage\Repositories\EpisodeRepository;
 use \GuzzleHttp\Client as HttpClient;
+use superbot\App\Configs\Interfaces\MovieCategory as InterfacesMovieCategory;
 
 class SettingsController extends MessageController
 {
@@ -53,15 +54,15 @@ class SettingsController extends MessageController
         $episode = new Episode();
         $episode->setNumber($number);
         $episode->setMovieId($id);
-        $episode->setFileId(Client::copyMessage(cfg::$episodes_channel, $this->user->id, $this->message->id)->result->message_id);
+        $episode->setFileId(Client::copyMessage(GeneralConfigs::CHANNEL_EPISODES, $this->user->id, $this->message->id)->result->message_id);
         $this->message->delete();
         if ($movie->getCategory() == 'TVSERIES') {
-            $url = cfg::$api_url . "?type=TVSERIES&episode=" . $episode->getNumber() . "&season=" . $movie->getSeason() . "&movie_id=" . $movie->getTmdbId();
+            $url = GeneralConfigs::TMDB_API_URI. "?type=TVSERIES&episode=" . $episode->getNumber() . "&season=" . $movie->getSeason() . "&movie_id=" . $movie->getTmdbId();
             $otherInfo = json_decode($this->httpClient->get($url)->getBody());
             $episode->setName($otherInfo->name);
             $episode->setPoster($otherInfo->poster);
             $episode->setSynopsis($otherInfo->synopsis);
-            $url = cfg::$domain . "/netfluzmax/photoshop/?pass=@Naruto96&saveEpisodePoster=1&fileName=" . $episode->getPoster() . "&source=" . cfg::$tmdb_photo_path . $episode->getPoster();
+            $url = GeneralConfigs::PHOTOSHOP_URI. "?pass=@Naruto96&saveEpisodePoster=1&fileName=" . $episode->getPoster() . "&source=" . GeneralConfigs::TMDB_PHOTO_URI . $episode->getPoster();
             $this->httpClient->get($url);
         }
         $this->epRepo->add($episode);
@@ -92,12 +93,12 @@ class SettingsController extends MessageController
             $movie = $this->movieRepo->getMovieSimpleById($id);
             $e = explode("/", $this->message->text);
             $movie_id = explode("-", end($e))[0];
-            $info = json_decode($this->httpClient->get(cfg::$api_url . '?type=' . $movie->getCategory() . '&movie_id=' . $movie_id . ($movie->getSeason() !== null ? '&season=' . $movie->getSeason() : ''))->getBody());
+            $info = json_decode($this->httpClient->get(GeneralConfigs::TMDB_API_URI. '?type=' . $movie->getCategory() . '&movie_id=' . $movie_id . ($movie->getSeason() !== null ? '&season=' . $movie->getSeason() : ''))->getBody());
             $movie->setTmdbId($movie_id);
             $movie->setName($info->name);
             $movie->setAiredOn($info->air_date);
             $movie->setEpisodesNumber($info->episodes);
-            $poster = $this->httpClient->get(cfg::$domain . "/netfluzmax/photoshop/?pass=@Naruto96&saveposter=1&source=" . $info->poster)->getBody();
+            $poster = $this->httpClient->get(GeneralConfigs::PHOTOSHOP_URI . "?pass=@Naruto96&saveposter=1&source=" . $info->poster)->getBody();
             $movie->setPoster($poster);
             $movie->setSynonyms("");
             $movie->setTrailer("#");
@@ -145,7 +146,7 @@ class SettingsController extends MessageController
             $photo_to_delete = $movie->getPoster();
             unlink("/var/www/netfluzmax/img/$photo_to_delete.jpg");
             $photo_file_id = $this->message->photo[count($this->message->photo) - 1]->file_id;
-            $photo = "https://api.telegram.org/file/bot" . cfg::$bot_token . "/" . Client::getFile($photo_file_id)->result->file_path;
+            $photo = "https://api.telegram.org/file/bot" . GeneralConfigs::BOT_TOKEN . "/" . Client::getFile($photo_file_id)->result->file_path;
             $poster = $this->httpClient->get("https://xohosting.it/netfluzmax/photoshop/?pass=@Naruto96&saveposter=1&source=" . $photo)->getBody();
             $movie->setPoster($poster);
             $this->movieRepo->Update($movie);
@@ -246,8 +247,8 @@ class SettingsController extends MessageController
     {
         $this->message->delete();
         $photo_file_id = $this->message->photo[count($this->message->photo) - 1]->file_id;
-        $photo = "https://api.telegram.org/file/bot" . cfg::$bot_token . "/" . Client::getFile($photo_file_id)->result->file_path;
-        $this->httpClient->get(cfg::$domain . "/netfluzmax/photoshop/?pass=@Naruto96&saveSimulcastPoster=1&pass=@Naruto96" . "&fileName=" . $photo_file_id . "&source=" . $photo);
+        $photo = "https://api.telegram.org/file/bot" . GeneralConfigs::BOT_TOKEN . "/" . Client::getFile($photo_file_id)->result->file_path;
+        $this->httpClient->get(GeneralConfigs::PHOTOSHOP_URI . "?pass=@Naruto96&saveSimulcastPoster=1&pass=@Naruto96" . "&fileName=" . $photo_file_id . "&source=" . $photo);
         if ($first_time) {
             $movie = new Movie();
             $movie->setName("");
@@ -259,7 +260,7 @@ class SettingsController extends MessageController
         } else {
             $movie = $this->movieRepo->getSimulcastByMovieId($id);
             try {
-                unlink("/var/www/netfluzmax/img/simulcasts/{$movie->getPoster()}.jpg");
+                unlink("/var/www/cinefreex/img/simulcasts/{$movie->getPoster()}.jpg");
             } catch (Exception $e) {
             }
             $movie->setPoster($photo_file_id);
@@ -307,8 +308,8 @@ class SettingsController extends MessageController
         $this->message->delete();
         $photo = end($this->message->photo);
         $poster_id = $photo->file_id;
-        $photo_file_id_telegram_uri = "https://api.telegram.org/file/bot" . cfg::$bot_token . "/" . Client::getFile($poster_id)->result->file_path;
-        $final_poster = cfg::$photoshop_uri . "?posterOrizzontale=" . $photo_file_id_telegram_uri;
+        $photo_file_id_telegram_uri = "https://api.telegram.org/file/bot" . GeneralConfigs::BOT_TOKEN . "/" . Client::getFile($poster_id)->result->file_path;
+        $final_poster = GeneralConfigs::PHOTOSHOP_URI . "?posterOrizzontale=" . $photo_file_id_telegram_uri;
         $movie = $this->movieRepo->getMovieSimpleById($id);
         switch ($movie->getCategory()) {
             case MovieCategory::TV_SERIES:

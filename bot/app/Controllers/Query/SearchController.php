@@ -3,7 +3,7 @@
 namespace superbot\App\Controllers\Query;
 
 use superbot\App\Controllers\QueryController;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\App\Controllers\UserController;
 use superbot\App\Storage\Repositories\MovieRepository;
 use superbot\App\Storage\Repositories\GenreRepository;
@@ -33,7 +33,7 @@ class SearchController extends QueryController
     {
         if ($options) {
             $menu[] = [["text" => get_button('it', 'advanced_search_on'), "callback_data" => "Search:home|0"]];
-            $menu[] = [["text" => get_button("it", "history"), "web_app" => ["url" => cfg::$webapp .  "/search/history/{$this->user->id}"]], ["text" => get_button("it", "year_search"), "callback_data" => "Search:selectType|byYear|0"]];
+            $menu[] = [["text" => get_button("it", "history"), "web_app" => ["url" => GeneralConfigs::WEBAPP_URI.  "/search/history/{$this->user->id}"]], ["text" => get_button("it", "year_search"), "callback_data" => "Search:selectType|byYear|0"]];
             $menu[] = [["text" => get_button("it", "genres_search"), "callback_data" => "Search:selectType|byGenres"], ["text" => get_button("it", "a-z-list"), "callback_data" => "Search:selectType|byList"]];
             $menu[] = [["text" => get_button("it", "ep_search"), "callback_data" => "Search:byEpisodesNumber"], ["text" => get_button("it", "random"), "callback_data" => "Search:selectType|random|1"]];
             $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Home:start"]];
@@ -53,29 +53,28 @@ class SearchController extends QueryController
         $this->user->page("Search:q|{$message_id}");
     }
 
-    public function q($category, $search_id, $offest)
+    public function q($search_id, $offset)
     {
-        $movies = $this->movieRepo->searchMoviesbyNameOrSynopsys($this->user->getSearchById($search_id)->getText(), $category, $offest);
-        if (count($movies) == 0) {
-            $this->query->alert("Non ci sono risultati per questa categoria!");
-            die;
-        }
-        $text = "RISULTATI:\n\n";
-        $x = 0;
-        $y = 0;
-
-        foreach ($movies as $key => $movie) {
-            $i = $key + 1;
-            if ($key == 10)
+        $search_text = $this->user->getSearchById($search_id)->getText();
+        $results = $this->movieRepo->searchMoviesbyNameOrSynonyms($search_text, $offset);
+        $text = null;
+        $x = $y = 0;
+        $emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+        foreach ($results as $key => $movie) {
+            if ($key == 10) {
+                $menu[] = [["text" => "»»»", "callback_data" => "Search:q|$search_id|10"], ["text" => "»»»", "callback_data" => "Search:q|$search_id|10"]];
                 continue;
-            $text .= $i . "➥ " . $movie->getName() . " " . $movie->getParsedSeason() . "\n";
+            }
+            $key = $emoji[$key];
+            $text .= $key . " | *" . $movie->getName() . " " . $movie->getParsedSeason() . "*\n";
             if ($x < 5) $x++;
             else {
                 $x = 1;
                 $y++;
             }
-            $menu[$y][] = ["text" => $i, "callback_data" => "Movie:view|{$movie->getId()}|1"];
+            $menu[$y][] = ["text" => $key, "callback_data" => "Movie:view|{$movie->getId()}|1"];
         }
+        $text .= "\nRisultati per « *{$search_text}* »";
         $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Search:home|1"]];
         $this->query->message->edit($text, $menu);
     }
@@ -113,7 +112,7 @@ class SearchController extends QueryController
 
     public function byList($type)
     {
-        $webapp = cfg::$webapp . "/search/{$this->user->id}/index/{$type}";
+        $webapp = GeneralConfigs::WEBAPP_URI. "/search/{$this->user->id}/index/{$type}";
         $menu[] = [["text" => "A", "web_app" => ["url" => "$webapp/a"]], ["text" => "B", "web_app" => ["url" => "$webapp/b"]], ["text" => "C", "web_app" => ["url" => "$webapp/c"]], ["text" => "D", "web_app" => ["url" => "$webapp/d"]]];
         $menu[] = [["text" => "E", "web_app" => ["url" => "$webapp/e"]], ["text" => "F", "web_app" => ["url" => "$webapp/f"]], ["text" => "G", "web_app" => ["url" => "$webapp/g"]], ["text" => "H", "web_app" => ["url" => "$webapp/h"]]];
         $menu[] = [["text" => "I", "web_app" => ["url" => "$webapp/i"]], ["text" => "J", "web_app" => ["url" => "$webapp/j"]], ["text" => "K", "web_app" => ["url" => "$webapp/k"]], ["text" => "L", "web_app" => ["url" => "$webapp/l"]]];
@@ -128,7 +127,7 @@ class SearchController extends QueryController
 
     public function byYear($type, $index = 0)
     {
-        $webapp = cfg::$webapp . "/search/{$this->user->id}/year/$type";
+        $webapp = GeneralConfigs::WEBAPP_URI. "/search/{$this->user->id}/year/$type";
         $next_index = $index + 10;
         $prev_index = $index - 10;
         $actual_year = (int)date("Y");
@@ -157,7 +156,7 @@ class SearchController extends QueryController
 
     public function byEpisodesNumber()
     {
-        $webapp = cfg::$webapp . "/search/{$this->user->id}/episodes";
+        $webapp = GeneralConfigs::WEBAPP_URI. "/search/{$this->user->id}/episodes";
         $menu[] = [["text" => "1~12ep", "web_app" => ["url" => "$webapp/1-12"]], ["text" => "13~26ep", "web_app" => ["url" => "$webapp/13-26"]]];
         $menu[] = [["text" => "27~60ep", "web_app" => ["url" => "$webapp/27-63"]]];
         $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Search:home|0|1"]];
@@ -190,7 +189,7 @@ class SearchController extends QueryController
             $menu[$y][] = ["text" => $g->getName() . " " . (($check) ? '🔵' : '🔴'), "callback_data" => "Search:byGenres|$type|{$g->getId()}|{$search_id}"];
         }
         if ($genre) {
-            $webapp = cfg::$webapp . "/search/{$this->user->id}/genres/{$type}/$search_id";
+            $webapp = GeneralConfigs::WEBAPP_URI. "/search/{$this->user->id}/genres/{$type}/$search_id";
             $menu[] = [["text" => get_button('it', 'search_results'), "web_app" => ["url" => $webapp]]];
         }
         $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Search:home|0|1"]];

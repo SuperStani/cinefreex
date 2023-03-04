@@ -2,12 +2,10 @@
 
 namespace superbot\App\Storage;
 
-use \Redis;
-
 class RedisController
 {
     private $conn;
-    public function __construct(Redis $connection)
+    public function __construct(\Redis $connection)
     {
         $this->conn = $connection;
     }

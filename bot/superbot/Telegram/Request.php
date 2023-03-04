@@ -2,14 +2,14 @@
 
 namespace superbot\Telegram;
 
-use superbot\App\Configs\GeneralConfigs;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 
 class Request
 {
     public static function get(string $method, array $args = [], $bot_token = null): \stdClass
     {
         $curl = curl_init();
-        $endpoint = "https://api.telegram.org/bot" . ($bot_token ?? GeneralConfigs::$bot_token) . "/";
+        $endpoint = "https://api.telegram.org/bot" . ($bot_token ?? GeneralConfigs::BOT_TOKEN) . "/";
         curl_setopt_array($curl, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,

@@ -1,10 +1,7 @@
 <?php
 
 namespace superbot\App\Storage;
-
-use superbot\App\Configs\DBConfigs;
-use PDO;
-use PDOException;
+use superbot\App\Configs\Interfaces\DatabaseCredentials;
 
 class DB
 {
@@ -12,8 +9,12 @@ class DB
     public function __construct()
     {
         try {
-            $this->conn = new PDO("mysql:host=" . DBConfigs::$dbhost . ";dbname=" . DBConfigs::$dbname, DBConfigs::$dbuser, DBConfigs::$dbpassword);
-        } catch (PDOException $e) {
+            $this->conn = new \PDO(
+                "mysql:host=" . DatabaseCredentials::HOST . ";dbname=" . DatabaseCredentials::DBNAME,
+                DatabaseCredentials::USER,
+                DatabaseCredentials::PASSWORD
+            );
+        } catch (\PDOException $e) {
             //$logger->warning($e->getMessage());
         }
     }
@@ -24,7 +25,10 @@ class DB
         $q = $conn->prepare($query);
         foreach ($vars as $key => &$value) {
             $key = $key + 1;
-            $q->bindParam($key, $value);
+            if (is_numeric($value))
+                $q->bindParam($key, $value, \PDO::PARAM_INT);
+            else
+                $q->bindParam($key, $value);
         }
         $q->execute();
         return $q->fetchObject();
@@ -37,12 +41,12 @@ class DB
         foreach ($vars as $key => &$value) {
             $key = $key + 1;
             if (is_numeric($value))
-                $q->bindParam($key, $value, PDO::PARAM_INT);
+                $q->bindParam($key, $value, \PDO::PARAM_INT);
             else
                 $q->bindParam($key, $value);
         }
         $q->execute();
-        return $q->fetchAll(PDO::FETCH_OBJ);
+        return $q->fetchAll(\PDO::FETCH_OBJ);
     }
 
 
@@ -58,11 +62,11 @@ class DB
             $q->execute();
             try {
                 $q = $conn->lastInsertId();
-            } catch (PDOException $e) {
+            } catch (\PDOException $e) {
                 
             }
             return $q;
-        } catch (PDOException $e) {
+        } catch (\PDOException $e) {
             
         }
     }

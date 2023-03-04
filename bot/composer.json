@@ -29,6 +29,8 @@
     "require": {
         "php-di/php-di": "^6.4",
         "ext-json": "*",
-        "guzzlehttp/guzzle": "^7.0"
+        "guzzlehttp/guzzle": "^7.0",
+        "ext-redis": "*",
+        "ext-pdo": "*"
     }
 }

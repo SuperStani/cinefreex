@@ -6,7 +6,7 @@ use superbot\App\Storage\DB;
 use superbot\App\Storage\Entities\Episode;
 use superbot\App\Storage\Entities\Movie;
 use superbot\App\Storage\Entities\Genre;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 
 class GeneralRepository
 {
@@ -36,7 +36,7 @@ class GeneralRepository
         $episode->setNumber($info[0]->episodeNumber ?? 1);
         $episode->setUrl($info[0]->url);
         $episode->setFileId($info[0]->file_id);
-        $episode->setPoster($info[0]->episode_poster ?? cfg::$episodes_photo_path . $info[0]->poster);
+        $episode->setPoster($info[0]->episode_poster ?? GeneralConfigs::EPISODES_PHOTO_URI . $info[0]->poster);
         $episode->setName($info[0]->eTitle ?? null);
         $episode->setSynopsis($info[0]->synopsis ?? null);
         if (isset($info[1])) {

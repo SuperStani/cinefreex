@@ -1,21 +1,23 @@
 <?php
 
-use superbot\App\Configs\DBConfigs;
+use \superbot\App\Configs\Interfaces\DatabaseCredentials;
+use \superbot\App\Configs\Interfaces\RedisCredentials;
 
 use \DI\ContainerBuilder;
-use Psr\Container\ContainerInterface;
-use function DI\autowire;
 use function DI\factory;
-use \Redis as Redis;
-use \PDO as PDO;
+
 
 $conf = [
-    PDO::class => factory(function () {
-        return new PDO("mysql:host=" . DBConfigs::$dbhost . ";dbname=" . DBConfigs::$dbname, DBConfigs::$dbuser, DBConfigs::$dbpassword);
+    \PDO::class => factory(function () {
+        return new \PDO(
+            "mysql:host=" . DatabaseCredentials::HOST . ";dbname=" . DatabaseCredentials::DBNAME,
+            DatabaseCredentials::USER,
+            DatabaseCredentials::PASSWORD
+        );
     }),
-    Redis::class => factory(function() {
-        $redis = new Redis();
-        $redis->connect(DBConfigs::$redishost, DBConfigs::$redisport);
+    \Redis::class => factory(function() {
+        $redis = new \Redis();
+        $redis->connect(RedisCredentials::SOCK);
         return $redis;
     })
 ];

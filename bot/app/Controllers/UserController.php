@@ -2,7 +2,7 @@
 
 namespace superbot\App\Controllers;
 
-use superbot\App\Configs\GeneralConfigs;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\Telegram\Client;
 use superbot\App\Storage\Repositories\UserRepository;
 use superbot\Telegram\Update;
@@ -59,7 +59,7 @@ class UserController extends Controller
 
     public function isAdmin()
     {
-        return in_array($this->id, GeneralConfigs::$admins);
+        return in_array($this->id, GeneralConfigs::ADMINS);
     }
 
     public function getMovieListByListType($type): ?array

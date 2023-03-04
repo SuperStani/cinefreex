@@ -3,7 +3,6 @@
 namespace superbot\App\Controllers\Query;
 
 use superbot\App\Controllers\QueryController;
-use superbot\App\Configs\GeneralConfigs as cfg;
 
 class PostController extends QueryController
 {

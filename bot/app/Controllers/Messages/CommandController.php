@@ -6,7 +6,7 @@ use superbot\App\Controllers\MessageController;
 use superbot\App\Controllers\Query\MovieController;
 use superbot\App\Controllers\Query\PlayerController;
 use superbot\Telegram\Client;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\App\Controllers\UserController;
 use superbot\App\Services\CacheService;
 use superbot\App\Storage\Repositories\CustomizedContentRepository;
@@ -47,10 +47,9 @@ class CommandController extends MessageController
             $this->user->page();
             if ($this->user->isAdmin()) {
                 $menu[] = [["text" => "➕ ADD NEW MOVIE", "callback_data" => "Post:new"]];
-                $menu[] = [["text" => "📊 STATISTICHE", "web_app" => ["url" => cfg::$webapp . "/stats"]], ["text" => get_button('it', 'broadcast'), "callback_data" => "Home:broadcast"]];
+                $menu[] = [["text" => "📊 STATISTICHE", "callback_data" => "Home:stats"], ["text" => get_button('it', 'broadcast'), "callback_data" => "Home:broadcast"]];
             }
-            $menu[] = [["text" => get_button('it', 'watch_movie'), "web_app" => ["url" => cfg::$webapp . "/home"]]];
-            $menu[] = [["text" => get_button('it', 'search'), "callback_data" => "Search:home|0"], ["text" => get_button('it', 'top'), "web_app" => ["url" => cfg::$webapp . "/leadership"]]];
+            $menu[] = [["text" => get_button('it', 'watch_movie'), "callback_data" => "Simulcast:home"]];
             $menu[] = [["text" => "➖➖➖➖➖➖", "callback_data" => "Home:null"]];
             $menu[] = [["text" => get_button('it', 'requests'), "callback_data" => 'Home:request'], ["text" => get_button('it', 'profile'), "callback_data" => "Profile:me|0"]];
             $menu[] = [["text" => get_button('it', 'tutorial'), "url" => "https://t.me/+FjXzQx6eStFhMDI8"], ["text" => get_button('it', 'feedbacks'), "url" => "t.me/NetfluzSegnalazioniBOT"]];
@@ -85,7 +84,7 @@ class CommandController extends MessageController
 
     public function listaserie()
     {
-        $webapp = cfg::$webapp . "/search/{$this->user->id}/index/TVSERIES";
+        $webapp =  GeneralConfigs::WEBAPP_URI . "/search/{$this->user->id}/index/TVSERIES";
         $menu[] = [["text" => "A", "web_app" => ["url" => "$webapp/a"]], ["text" => "B", "web_app" => ["url" => "$webapp/b"]], ["text" => "C", "web_app" => ["url" => "$webapp/c"]], ["text" => "D", "web_app" => ["url" => "$webapp/d"]]];
         $menu[] = [["text" => "E", "web_app" => ["url" => "$webapp/e"]], ["text" => "F", "web_app" => ["url" => "$webapp/f"]], ["text" => "G", "web_app" => ["url" => "$webapp/g"]], ["text" => "H", "web_app" => ["url" => "$webapp/h"]]];
         $menu[] = [["text" => "I", "web_app" => ["url" => "$webapp/i"]], ["text" => "J", "web_app" => ["url" => "$webapp/j"]], ["text" => "K", "web_app" => ["url" => "$webapp/k"]], ["text" => "L", "web_app" => ["url" => "$webapp/l"]]];
@@ -99,7 +98,7 @@ class CommandController extends MessageController
 
     public function listafilm()
     {
-        $webapp = cfg::$webapp . "/search/{$this->user->id}/index/FILM";
+        $webapp = GeneralConfigs::WEBAPP_URI . "/search/{$this->user->id}/index/FILM";
         $menu[] = [["text" => "A", "web_app" => ["url" => "$webapp/a"]], ["text" => "B", "web_app" => ["url" => "$webapp/b"]], ["text" => "C", "web_app" => ["url" => "$webapp/c"]], ["text" => "D", "web_app" => ["url" => "$webapp/d"]]];
         $menu[] = [["text" => "E", "web_app" => ["url" => "$webapp/e"]], ["text" => "F", "web_app" => ["url" => "$webapp/f"]], ["text" => "G", "web_app" => ["url" => "$webapp/g"]], ["text" => "H", "web_app" => ["url" => "$webapp/h"]]];
         $menu[] = [["text" => "I", "web_app" => ["url" => "$webapp/i"]], ["text" => "J", "web_app" => ["url" => "$webapp/j"]], ["text" => "K", "web_app" => ["url" => "$webapp/k"]], ["text" => "L", "web_app" => ["url" => "$webapp/l"]]];

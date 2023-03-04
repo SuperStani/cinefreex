@@ -5,7 +5,7 @@ namespace superbot\App\Storage\Repositories;
 use superbot\App\Storage\DB;
 use superbot\App\Storage\Entities\Episode;
 use superbot\Telegram\Client;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 
 
 class EpisodeRepository
@@ -86,7 +86,7 @@ class EpisodeRepository
             $episode->setMovieId($movie);
             $episode->setFileId($ep->msgid);
             if ($type == 'TVSERIES') {
-                $url = cfg::$api_url . "?type=TVSERIES&episode=" . $episode->getNumber() . "&season=" . $season . "&movie_id=" . $tmdbid;
+                $url = GeneralConfigs::TMDB_API_URI. "?type=TVSERIES&episode=" . $episode->getNumber() . "&season=" . $season . "&movie_id=" . $tmdbid;
                 $otherInfo = json_decode(file_get_contents($url));
                 $episode->setName($otherInfo->name);
                 $episode->setPoster($otherInfo->poster);

@@ -7,7 +7,7 @@ use superbot\App\Storage\Repositories\GenreRepository;
 use superbot\App\Storage\Entities\Movie;
 use superbot\App\Storage\Entities\Episode;
 use superbot\App\Storage\Repositories\EpisodeRepository;
-use superbot\App\Configs\GeneralConfigs as cfg;
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 
 class TransferData
 {
@@ -112,14 +112,14 @@ class TransferData
             $episode->setId($e->id);
             $episode->setMovieId($e->movie);
             $episode->setUrl($e->url);
-            $url = cfg::$api_url . "?type=TVSERIES&episode=" . $episode->getNumber() . "&season=" . $e->season . "&movie_id=" . $e->tmdb_id;
+            $url = GeneralConfigs::TMDB_API_URI. "?type=TVSERIES&episode=" . $episode->getNumber() . "&season=" . $e->season . "&movie_id=" . $e->tmdb_id;
             echo $url . PHP_EOL;
             $otherInfo = json_decode(file_get_contents($url));
             $episode->setName($otherInfo->name);
             $episode->setPoster($otherInfo->poster);
             $episode->setSynopsis($otherInfo->synopsis);
             var_dump($episode);
-            $url = "https://offertesh.it/netfluzmax/photoshop/?pass=@Naruto96&saveEpisodePoster=1&fileName=" . $episode->getPoster() . "&source=" . cfg::$tmdb_photo_path  . $episode->getPoster();
+            $url = "https://offertesh.it/netfluzmax/photoshop/?pass=@Naruto96&saveEpisodePoster=1&fileName=" . $episode->getPoster() . "&source=" . GeneralConfigs::TMDB_PHOTO_URI  . $episode->getPoster();
             echo $url . PHP_EOL;
             //file_get_contents($url);
             //$this->episodeRepo->update($episode);
