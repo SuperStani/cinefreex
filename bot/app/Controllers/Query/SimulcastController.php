@@ -28,7 +28,7 @@ class SimulcastController extends QueryController
     }
 
 
-    public function home($offset) {
+    public function home($offset = 0) {
         $max_simulcasts = 9;
         $simulcast = $this->movieRepo->getSimulcastByOffset($offset);
         $offset = str_replace([8, 0], [0, 8], $offset);
@@ -41,7 +41,7 @@ class SimulcastController extends QueryController
         $menu[] = [["text" => get_button('it', 'search'), "callback_data" => "Search:home|0"], ["text" => get_button('it', 'top'), "callback_data" => "Top:show|0"]];
         $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Home:start|1"]];
         $this->query->message->delete();
-        return $this->query->message->reply_photo(GeneralConfigs::POSTER_PHOTO_URI. $simulcast->getPoster(), $text, $menu);
+        return $this->query->message->reply_photo(GeneralConfigs::BANNER_PHOTO_URI. $simulcast->getPoster(), $text, $menu);
     }
 
     public function settup($id)

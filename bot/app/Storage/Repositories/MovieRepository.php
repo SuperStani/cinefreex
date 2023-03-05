@@ -2,6 +2,7 @@
 
 namespace superbot\App\Storage\Repositories;
 
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\App\Storage\DB;
 use superbot\App\Storage\Entities\Episode;
 use superbot\App\Storage\Entities\Movie;
@@ -10,17 +11,19 @@ use superbot\App\Services\CacheService;
 
 class MovieRepository
 {
-    private $conn;
-    private $episodeRepo;
-    private $genreRepo;
-    private $cacheService;
-    private static $table = 'movie';
+    private DB $conn;
+    private EpisodeRepository $episodeRepo;
+    private GenreRepository $genreRepo;
+    private CacheService $cacheService;
+    private static string $table = 'movie';
+
     public function __construct(
         DB $conn,
         CacheService $cacheService,
         EpisodeRepository $episodeRepo,
         GenreRepository $genreRepo
-    ) {
+    )
+    {
         $this->conn = $conn;
         $this->episodeRepo = $episodeRepo;
         $this->genreRepo = $genreRepo;
@@ -211,10 +214,238 @@ class MovieRepository
     public function searchMoviesbyNameOrSynonyms($q, $offset = 0, $limit = 10): array
     {
         $query = "SELECT * FROM " . self::$table . " WHERE name LIKE ? OR synonyms LIKE ? LIMIT ?, ?";
-        $results = $this->conn->rqueryALl(
+        $results = $this->conn->rqueryAll(
             $query,
             '%' . $q . '%',
             '%' . $q . '%',
+            $offset,
+            $limit
+        );
+
+        $r = [];
+        foreach ($results as $row) {
+            $movie = new Movie();
+            $movie->setId($row->id);
+            $movie->setName($row->name);
+            $movie->setAiredOn($row->aired_on);
+            $movie->setCategory($row->category);
+            $movie->setEpisodesNumber($row->episodes);
+            $movie->setPoster($row->poster);
+            $movie->setSynonyms($row->synonyms);
+            $movie->setTrailer($row->trailer);
+            $movie->setSynopsis($row->synopsis);
+            $movie->setSynopsisUrl($row->synopsis_url);
+            $movie->setDuration($row->duration);
+            $movie->setSeason($row->season);
+            $movie->setGenres($this->genreRepo->getGenresByMovieId($movie->getId()));
+            $r[] = $movie;
+        }
+        return $r;
+    }
+
+    public function searchMoviesByIndexAndCategory($index, $category, $offset = 0, $limit = 10): array
+    {
+        if ($index === '#') {
+            $query = "SELECT * FROM " . self::$table . " WHERE category = ? AND name REGEXP '^[0-9\.\_\#]' LIMIT ?, ?";
+            $results = $this->conn->rqueryAll(
+                $query,
+                $category,
+                $offset,
+                $limit
+            );
+        } else {
+            $query = "SELECT * FROM " . self::$table . " WHERE category = ? AND name LIKE ? LIMIT ?, ?";
+            $results = $this->conn->rqueryAll(
+                $query,
+                $category,
+                $index . '%',
+                $offset,
+                $limit
+            );
+        }
+
+        $r = [];
+        foreach ($results as $row) {
+            $movie = new Movie();
+            $movie->setId($row->id);
+            $movie->setName($row->name);
+            $movie->setAiredOn($row->aired_on);
+            $movie->setCategory($row->category);
+            $movie->setEpisodesNumber($row->episodes);
+            $movie->setPoster($row->poster);
+            $movie->setSynonyms($row->synonyms);
+            $movie->setTrailer($row->trailer);
+            $movie->setSynopsis($row->synopsis);
+            $movie->setSynopsisUrl($row->synopsis_url);
+            $movie->setDuration($row->duration);
+            $movie->setSeason($row->season);
+            $movie->setGenres($this->genreRepo->getGenresByMovieId($movie->getId()));
+            $r[] = $movie;
+        }
+        return $r;
+    }
+
+    public function getMoviesPreferreds($user_id, $offset, $limit)
+    {
+        $query = "SELECT m.* FROM movie m LEFT JOIN movie_preferreds mp ON m.id = mp.movie WHERE mp.user = ?";
+        $results = $this->conn->rqueryAll(
+            $query,
+            $user_id,
+            $offset,
+            $limit
+        );
+
+        $r = [];
+        foreach ($results as $row) {
+            $movie = new Movie();
+            $movie->setId($row->id);
+            $movie->setName($row->name);
+            $movie->setAiredOn($row->aired_on);
+            $movie->setCategory($row->category);
+            $movie->setEpisodesNumber($row->episodes);
+            $movie->setPoster($row->poster);
+            $movie->setSynonyms($row->synonyms);
+            $movie->setTrailer($row->trailer);
+            $movie->setSynopsis($row->synopsis);
+            $movie->setSynopsisUrl($row->synopsis_url);
+            $movie->setDuration($row->duration);
+            $movie->setSeason($row->season);
+            $movie->setGenres($this->genreRepo->getGenresByMovieId($movie->getId()));
+            $r[] = $movie;
+        }
+        return $r;
+    }
+
+    public function getMoviesByWatchList($list, $user_id, $offset, $limit)
+    {
+
+    }
+
+    public function searchMoviesByHistory($user_id, $offset = 0, $limit = 10): array
+    {
+
+        $query = "SELECT MAX(ms.search_date) as search_date, m.* FROM " . self::$table . " m LEFT JOIN movie_history ms ON m.id + ms.movie WHERE ms.user = ? GROUP by ms.user, m.id ORDER By search_date DESC LIMIT ?, ?";
+        $results = $this->conn->rqueryAll(
+            $query,
+            $user_id,
+            $offset,
+            $limit
+        );
+
+
+        $r = [];
+        foreach ($results as $row) {
+            $movie = new Movie();
+            $movie->setId($row->id);
+            $movie->setName($row->name);
+            $movie->setAiredOn($row->aired_on);
+            $movie->setCategory($row->category);
+            $movie->setEpisodesNumber($row->episodes);
+            $movie->setPoster($row->poster);
+            $movie->setSynonyms($row->synonyms);
+            $movie->setTrailer($row->trailer);
+            $movie->setSynopsis($row->synopsis);
+            $movie->setSynopsisUrl($row->synopsis_url);
+            $movie->setDuration($row->duration);
+            $movie->setSeason($row->season);
+            $movie->setGenres($this->genreRepo->getGenresByMovieId($movie->getId()));
+            $r[] = $movie;
+        }
+        return $r;
+    }
+
+    public function searchMoviesByYearAndCategory($year, $category, $offset = 0, $limit = 10): array
+    {
+        $query = "SELECT * FROM " . self::$table . " WHERE category = ? AND YEAR(aired_on) = ? LIMIT ?, ?";
+        $results = $this->conn->rqueryAll(
+            $query,
+            $category,
+            $year,
+            $offset,
+            $limit
+        );
+
+
+        $r = [];
+        foreach ($results as $row) {
+            $movie = new Movie();
+            $movie->setId($row->id);
+            $movie->setName($row->name);
+            $movie->setAiredOn($row->aired_on);
+            $movie->setCategory($row->category);
+            $movie->setEpisodesNumber($row->episodes);
+            $movie->setPoster($row->poster);
+            $movie->setSynonyms($row->synonyms);
+            $movie->setTrailer($row->trailer);
+            $movie->setSynopsis($row->synopsis);
+            $movie->setSynopsisUrl($row->synopsis_url);
+            $movie->setDuration($row->duration);
+            $movie->setSeason($row->season);
+            $movie->setGenres($this->genreRepo->getGenresByMovieId($movie->getId()));
+            $r[] = $movie;
+        }
+        return $r;
+    }
+
+    public function searchMoviesByEpisodesNumber($min = 0, $max = 10, $offset = 0, $limit = 10): array
+    {
+        $query = "SELECT * FROM " . self::$table . " WHERE episodes BETWEEN ? AND ? LIMIT ?, ?";
+        $results = $this->conn->rqueryAll(
+            $query,
+            $min,
+            $max,
+            $offset,
+            $limit
+        );
+
+        $r = [];
+        foreach ($results as $row) {
+            $movie = new Movie();
+            $movie->setId($row->id);
+            $movie->setName($row->name);
+            $movie->setAiredOn($row->aired_on);
+            $movie->setCategory($row->category);
+            $movie->setEpisodesNumber($row->episodes);
+            $movie->setPoster($row->poster);
+            $movie->setSynonyms($row->synonyms);
+            $movie->setTrailer($row->trailer);
+            $movie->setSynopsis($row->synopsis);
+            $movie->setSynopsisUrl($row->synopsis_url);
+            $movie->setDuration($row->duration);
+            $movie->setSeason($row->season);
+            $movie->setGenres($this->genreRepo->getGenresByMovieId($movie->getId()));
+            $r[] = $movie;
+        }
+        return $r;
+    }
+
+    public function searchMoviesByGenresAndCategory($search_id, $category, $offset, $limit)
+    {
+        $query = "SELECT 
+                  COUNT(mg.genre) as total,
+  	              m.*
+              FROM movie m
+              INNER JOIN movie_genres mg
+              ON mg.movie = m.id 
+              WHERE m.category = ?
+              AND mg.genre IN(SELECT 
+                                              genre
+                                              FROM search_genres
+                                              WHERE s_id = ?
+                                          ) 
+              AND m.season < 2
+              GROUP by mg.movie
+              HAVING COUNT(mg.genre) >= (SELECT 
+                                                      COUNT(genre) 
+                                                      FROM search_genres
+                                                      WHERE s_id = ?
+                                                      )
+              ORDER by total DESC LIMIT ?, ?";
+        $results = $this->conn->rqueryAll(
+            $query,
+            $category,
+            $search_id,
+            $search_id,
             $offset,
             $limit
         );

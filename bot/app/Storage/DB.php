@@ -56,7 +56,10 @@ class DB
         $q = $conn->prepare($query);
         foreach ($vars as $key => &$value) {
             $key = $key + 1;
-            $q->bindParam($key, $value);
+            if (is_numeric($value))
+                $q->bindParam($key, $value, \PDO::PARAM_INT);
+            else
+                $q->bindParam($key, $value);
         }
         try {
             $q->execute();

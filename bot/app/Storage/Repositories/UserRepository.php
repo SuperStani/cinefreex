@@ -70,8 +70,9 @@ class UserRepository
         return 0;
     }
 
-    public function getMoviesHistory($user_id)
+    public function getMoviesHistory($user_id, $offset, $limit)
     {
+        return $this->movieRepo->searchMoviesByHistory($user_id, $offset, $limit);
     }
 
     public function getTotalUsers(): int

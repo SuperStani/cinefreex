@@ -2,6 +2,7 @@
 
 namespace superbot\App\Controllers\Messages;
 
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\App\Controllers\MessageController;
 use superbot\Telegram\Client;
 use superbot\App\Logger\Log;
@@ -31,20 +32,19 @@ class SearchController extends MessageController
     {
         if ($message_id != null)
             Client::deleteMessage($this->user->id, $message_id);
-        $results = $this->movieRepo->searchMoviesbyNameOrSynonyms($this->message->text, 0);
-
+        $results = $this->movieRepo->searchMoviesbyNameOrSynonyms($this->message->text, 0, GeneralConfigs::MAX_SEARCH_RESULTS + 1);
         if (count($results) == 0) {
-            $this->message->reply("Non ho trovato niente!");
+            $this->message->reply("Non ho trovato niente!", [[["text" => get_button("it", "back"), "callback_data" => "Search:home|0"]]]);
             die;
         }
 
-        $search_id = $this->user->saveSearch(SearchCategory::BY_NAME, $this->message->text);
+        $search_id = $this->user->saveSearch(SearchCategory::BY_NAME, $this->message->text)->getId();
 
         $text = null;
         $x = $y = 0;
         $emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
         foreach ($results as $key => $movie) {
-            if ($key == 10) {
+            if ($key == GeneralConfigs::MAX_SEARCH_RESULTS ) {
                 $menu[] = [["text" => "»»»", "callback_data" => "Search:q|$search_id|10"]];
                 continue;
             }
@@ -58,7 +58,7 @@ class SearchController extends MessageController
             $menu[$y][] = ["text" => $key, "callback_data" => "Movie:view|{$movie->getId()}|1"];
         }
         $text .= "\nRisultati per « *{$this->message->text}* »";
-        $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Search:home|1"]];
+        $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Search:home|0"]];
         $this->message->reply($text, $menu);
         $this->message->delete();
     }

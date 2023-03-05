@@ -77,9 +77,9 @@ class UserController extends Controller
         return $this->userRepo->getTotalWatchingTimeOnMovies($this->id);
     }
 
-    public function getMoviesHistory()
+    public function getMoviesHistory($offset, $limit)
     {
-        return $this->userRepo->getMoviesHistory($this->id);
+        return $this->userRepo->getMoviesHistory($this->id, $offset, $limit);
     }
 
     public function saveSearch($category, $text = null): ?Search

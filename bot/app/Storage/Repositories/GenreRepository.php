@@ -18,7 +18,7 @@ class GenreRepository
 
     public function add($name)
     {
-        $query = "INSERT INTO netfluzmax." . self::$table . " SET name = ?";
+        $query = "INSERT INTO " . self::$table . " SET name = ?";
         try {
             $this->conn->wquery($query, $name);
         } catch (Exception $e) {
@@ -56,7 +56,7 @@ class GenreRepository
 
     public function addGenreToMovie($id, $movie_id)
     {
-        $query = "INSERT INTO netfluzmax.movie_" . self::$table . " SET movie = ?, genre = ?";
+        $query = "INSERT INTO movie_" . self::$table . " SET movie = ?, genre = ?";
         $this->conn->wquery($query, $movie_id, $id);
     }
 
