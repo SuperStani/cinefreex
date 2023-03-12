@@ -25,7 +25,7 @@ class ProfileController extends QueryController
         $this->movieRepo = $movieRepo;
     }
 
-    public function me($delete_message)
+    public function me($delete_message = false)
     {
         $total_films = $this->user->getTotalMoviesWatched(); //$this->conn->rquery("SELECT COUNT(*) AS tot FROM movie a INNER JOIN movie_watchlists aw ON a.id = aw.movie WHERE aw.user = ? AND aw.list = 1  AND a.season < 2 AND a.category <> 'Movie'", $this->user->id)->tot;
         $total_tvseries =  $this->user->getTotalTvSeriesWatched(); //$this->conn->rquery("SELECT COUNT(*) AS tot FROM movie a INNER JOIN movie_watchlists aw ON a.id = aw.movie WHERE aw.user = ? AND aw.list = 1  AND a.season < 2 AND a.category = 'Movie'", $this->user->id)->tot;
@@ -52,7 +52,6 @@ class ProfileController extends QueryController
         if(count($results) === 0) {
             return $this->query->alert('Non ho trovato risultati!', true);
         }
-        $this->user->saveSearch(SearchCategory::BY_EPISODES);
         $text = null;
         $x = $y = 0;
         $offset_back = GeneralConfigs::MAX_SEARCH_RESULTS - $offset;
@@ -80,7 +79,53 @@ class ProfileController extends QueryController
             $menu[] = [["text" => "«««", "callback_data" => "Profile:preferreds|$offset_back"]];
         }
         $text .= "*I tuoi preferiti*";
-        $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Profile:home"]];
+        $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Profile:me"]];
+        $this->query->message->edit($text, $menu);
+    }
+
+    public function watchlist($list, $offset = 0) {
+        $results = $this->movieRepo->getMoviesByWatchList($list, $this->user->id, $offset, GeneralConfigs::MAX_SEARCH_RESULTS + 1);
+        if(count($results) === 0) {
+            return $this->query->alert('Non ho trovato risultati!', true);
+        }
+        $text = null;
+        $x = $y = 0;
+        $offset_back = GeneralConfigs::MAX_SEARCH_RESULTS - $offset;
+        $offset_next = GeneralConfigs::MAX_SEARCH_RESULTS + $offset;
+        $emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+        switch($list) {
+            case 1:
+                $list_name = 'COMPLETED';
+                break;
+            case 2:
+                $list_name = 'WATCHING';
+                break;
+            case 3:
+                $list_name = 'PLAN-TO-WATCH';
+        }
+        foreach ($results as $key => $movie) {
+            if ($key == GeneralConfigs::MAX_SEARCH_RESULTS) {
+                if($offset > 0) {
+                    $menu[] = [["text" => "«««", "callback_data" => "Profile:watchlist|$list|$offset_back"], ["text" => "»»»", "callback_data" => "Profile:watchlist|$list|$offset_next"]];
+                } else {
+                    $menu[] = [["text" => "»»»", "callback_data" => "Profile:watchlist|$list|$offset_next"]];
+                }
+                continue;
+            }
+            $key = $emoji[$key];
+            $text .= $key . " | *" . $movie->getName() . " " . $movie->getParsedSeason() . "*\n{$movie->getParsedGenres()}\n\n";
+            if ($x < 5) $x++;
+            else {
+                $x = 1;
+                $y++;
+            }
+            $menu[$y][] = ["text" => $key, "callback_data" => "Movie:view|{$movie->getId()}|1"];
+        }
+        if(count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1 && $offset > 0) {
+            $menu[] = [["text" => "«««", "callback_data" => "Profile:watchlist|$list|$offset_back"]];
+        }
+        $text .= "*$list_name LIST*";
+        $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Profile:me"]];
         $this->query->message->edit($text, $menu);
     }
 }

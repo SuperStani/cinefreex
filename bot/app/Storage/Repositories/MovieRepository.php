@@ -2,7 +2,6 @@
 
 namespace superbot\App\Storage\Repositories;
 
-use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\App\Storage\DB;
 use superbot\App\Storage\Entities\Episode;
 use superbot\App\Storage\Entities\Movie;
@@ -285,42 +284,6 @@ class MovieRepository
         return $r;
     }
 
-    public function getMoviesPreferreds($user_id, $offset, $limit)
-    {
-        $query = "SELECT m.* FROM movie m LEFT JOIN movie_preferreds mp ON m.id = mp.movie WHERE mp.user = ?";
-        $results = $this->conn->rqueryAll(
-            $query,
-            $user_id,
-            $offset,
-            $limit
-        );
-
-        $r = [];
-        foreach ($results as $row) {
-            $movie = new Movie();
-            $movie->setId($row->id);
-            $movie->setName($row->name);
-            $movie->setAiredOn($row->aired_on);
-            $movie->setCategory($row->category);
-            $movie->setEpisodesNumber($row->episodes);
-            $movie->setPoster($row->poster);
-            $movie->setSynonyms($row->synonyms);
-            $movie->setTrailer($row->trailer);
-            $movie->setSynopsis($row->synopsis);
-            $movie->setSynopsisUrl($row->synopsis_url);
-            $movie->setDuration($row->duration);
-            $movie->setSeason($row->season);
-            $movie->setGenres($this->genreRepo->getGenresByMovieId($movie->getId()));
-            $r[] = $movie;
-        }
-        return $r;
-    }
-
-    public function getMoviesByWatchList($list, $user_id, $offset, $limit)
-    {
-
-    }
-
     public function searchMoviesByHistory($user_id, $offset = 0, $limit = 10): array
     {
 
@@ -498,6 +461,69 @@ class MovieRepository
             $movie->setTrailer($row->trailer);
             $movie->setSynopsis($row->synopsis);
             $movie->setSynopsisUrl($row->synopsis_url);
+            $movie->setGenres($this->genreRepo->getGenresByMovieId($movie->getId()));
+            $r[] = $movie;
+        }
+        return $r;
+    }
+
+    public function getMoviesPreferreds($user_id, $offset, $limit)
+    {
+        $query = "SELECT m.* FROM movie m LEFT JOIN movie_preferreds mp ON m.id = mp.movie WHERE mp.user = ? LIMIT ?,?";
+        $results = $this->conn->rqueryAll(
+            $query,
+            $user_id,
+            $offset,
+            $limit
+        );
+
+        $r = [];
+        foreach ($results as $row) {
+            $movie = new Movie();
+            $movie->setId($row->id);
+            $movie->setName($row->name);
+            $movie->setAiredOn($row->aired_on);
+            $movie->setCategory($row->category);
+            $movie->setEpisodesNumber($row->episodes);
+            $movie->setPoster($row->poster);
+            $movie->setSynonyms($row->synonyms);
+            $movie->setTrailer($row->trailer);
+            $movie->setSynopsis($row->synopsis);
+            $movie->setSynopsisUrl($row->synopsis_url);
+            $movie->setDuration($row->duration);
+            $movie->setSeason($row->season);
+            $movie->setGenres($this->genreRepo->getGenresByMovieId($movie->getId()));
+            $r[] = $movie;
+        }
+        return $r;
+    }
+
+    public function getMoviesByWatchList($list, $user_id, $offset, $limit)
+    {
+        $query = "SELECT m.* FROM movie m LEFT JOIN movie_watchlists mp ON m.id = mp.movie WHERE mp.user = ? AND mp.list = ? LIMIT ?,?";
+        $results = $this->conn->rqueryAll(
+            $query,
+            $user_id,
+            $list,
+            $offset,
+            $limit
+        );
+
+        $r = [];
+        foreach ($results as $row) {
+            $movie = new Movie();
+            $movie->setId($row->id);
+            $movie->setName($row->name);
+            $movie->setAiredOn($row->aired_on);
+            $movie->setCategory($row->category);
+            $movie->setEpisodesNumber($row->episodes);
+            $movie->setPoster($row->poster);
+            $movie->setSynonyms($row->synonyms);
+            $movie->setTrailer($row->trailer);
+            $movie->setSynopsis($row->synopsis);
+            $movie->setSynopsisUrl($row->synopsis_url);
+            $movie->setDuration($row->duration);
+            $movie->setSeason($row->season);
             $movie->setGenres($this->genreRepo->getGenresByMovieId($movie->getId()));
             $r[] = $movie;
         }
