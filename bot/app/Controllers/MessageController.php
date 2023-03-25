@@ -6,7 +6,7 @@ use superbot\App\Logger\Log;
 use superbot\Telegram\Message;
 use superbot\App\Controllers\UserController;
 
-class MessageController extends Controller
+abstract class MessageController extends Controller
 {
     protected Message $message;
     protected UserController $user;

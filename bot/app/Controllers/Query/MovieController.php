@@ -13,8 +13,8 @@ use superbot\Telegram\Query as QueryUpdate;
 
 class MovieController extends QueryController
 {
-    private $movieRepo;
-    private $cacheService;
+    private MovieRepository $movieRepo;
+    private CacheService $cacheService;
     public function __construct(
         QueryUpdate $query,
         UserController $user,
@@ -62,10 +62,10 @@ class MovieController extends QueryController
                 if ($episode->getFileId() !== 0) {
                     $menu[] = [["text" => "▶️ GUARDA ORA ", "callback_data" => "Player:play|$id|1|1"]];
                 } else {
-                    $menu[] = [["text" => "▶️ GUARDA ORA ", "url" => $episode->getUrl() ?? "t.me/netfluzrobot"]];
+                    $menu[] = [["text" => "▶️ GUARDA ORA ", "url" => $episode->getUrl() ?? "https://t.me/Cinefrexv3_bot"]];
                 }
             } else {
-                $menu[] = [["text" => "▶️ GUARDA ORA ", "url" => "t.me/netfluzrobot"]];
+                $menu[] = [["text" => "▶️ GUARDA ORA ", "url" => "https://t.me/Cinefrexv3_bot"]];
             }
         } else {
             if (($episode = $this->user->haveViewInHistoryByMovieId($id)) !== false)
@@ -78,7 +78,7 @@ class MovieController extends QueryController
         if ($group !== null)
             $menu[] = [["text" => get_button('it', 'correlated'), "web_app" => ["url" => GeneralConfigs::WEBAPP_URI . "/movie/{$id}/correlated"]], ["text" => get_button('it', 'similar1'), "web_app" => ["url" => GeneralConfigs::WEBAPP_URI . "/movie/{$id}/similar/{$movie->getCategory()}"]]];
         else
-            $menu[] = [["text" => get_button('it', 'similar'), "web_app" => ["url" => GeneralConfigs::WEBAPP_URI . "/movie/{$id}/similar/{$movie->getCategory()}"]]];
+            $menu[] = [["text" => get_button('it', 'similar'), "callback_data" => "Movie:similar|$id"]];
         $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Search:home|1"]];
 
         if ($movie->getCategory() == 'FILM') {
@@ -179,7 +179,7 @@ class MovieController extends QueryController
         $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Movie:view|$id|1"]];
         $caption = "*CONTENUTI SIMILI:*\n";
         foreach (($similar = $this->movieRepo->getSimilarMovie($movie)) as $m) {
-            $caption .= "\n" . "➥ [" . $m->getName() . " " . $m->getParsedSeason() . "]" . "(https://t.me/myanimetvbetabot?start=movieID_" . $m->getId() . ")";
+            $caption .= "\n" . "➥ [" . $m->getName() . " " . $m->getParsedSeason() . "]" . "(https://t.me/Cinefrexv3_bot?start=movieID_" . $m->getId() . ")";
         }
         return $this->query->message->edit_media(GeneralConfigs::POSTER_PHOTO_URI . $movie->getPoster(), $caption, $menu);
     }

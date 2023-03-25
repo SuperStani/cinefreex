@@ -16,13 +16,15 @@ class SearchController extends QueryController
 {
     private MovieRepository $movieRepo;
     private GenreRepository $genreRepo;
+
     public function __construct(
         QueryUpdate $query,
         UserController $user,
         MovieRepository $movieRepo,
         GenreRepository $genreRepo,
         Log $logger
-    ) {
+    )
+    {
         $this->query = $query;
         $this->user = $user;
         $this->logger = $logger;
@@ -37,11 +39,10 @@ class SearchController extends QueryController
             $menu[] = [["text" => get_button("it", "history"), "callback_data" => "Search:byHistory|0"], ["text" => get_button("it", "year_search"), "callback_data" => "Search:selectType|byYear|0"]];
             $menu[] = [["text" => get_button("it", "genres_search"), "callback_data" => "Search:selectType|byGenres"], ["text" => get_button("it", "a-z-list"), "callback_data" => "Search:selectType|byList"]];
             $menu[] = [["text" => get_button("it", "ep_search"), "callback_data" => "Search:byEpisodesNumber"], ["text" => get_button("it", "random"), "callback_data" => "Search:selectType|random|1"]];
-            $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Home:start"]];
         } else {
             $menu[] = [["text" => get_button('it', 'advanced_search_off'), "callback_data" => "Search:home|0|1"]];
-            $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Home:start"]];
         }
+        $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Home:start"]];
         $text = get_string('it', 'search_home');
         if ($delete_message) {
             $this->query->message->delete();
@@ -60,12 +61,12 @@ class SearchController extends QueryController
         $results = $this->movieRepo->searchMoviesbyNameOrSynonyms($search_text, $offset, GeneralConfigs::MAX_SEARCH_RESULTS + 1);
         $text = null;
         $x = $y = 0;
-        $offset_back = GeneralConfigs::MAX_SEARCH_RESULTS - $offset;
-        $offset_next = GeneralConfigs::MAX_SEARCH_RESULTS + $offset;
+        $offset_back = $offset - GeneralConfigs::MAX_SEARCH_RESULTS;
+        $offset_next = $offset + GeneralConfigs::MAX_SEARCH_RESULTS;
         $emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
         foreach ($results as $key => $movie) {
             if ($key == 10) {
-                if($offset > 0) {
+                if ($offset > 0) {
                     $menu[] = [["text" => "«««", "callback_data" => "Search:q|$search_id|$offset_back"], ["text" => "»»»", "callback_data" => "Search:q|$search_id|$offset_next"]];
                 } else {
                     $menu[] = [["text" => "»»»", "callback_data" => "Search:q|$search_id|$offset_next"]];
@@ -81,7 +82,7 @@ class SearchController extends QueryController
             }
             $menu[$y][] = ["text" => $key, "callback_data" => "Movie:view|{$movie->getId()}|1"];
         }
-        if(count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1) {
+        if (count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1) {
             $menu[] = [["text" => "«««", "callback_data" => "Search:q|$search_id|$offset_back"]];
         }
         $text .= "Risultati per « *{$search_text}* »";
@@ -89,20 +90,21 @@ class SearchController extends QueryController
         $this->query->message->edit($text, $menu);
     }
 
-    public function byHistory($offset = 0) {
+    public function byHistory($offset = 0)
+    {
         $results = $this->user->getMoviesHistory($offset, GeneralConfigs::MAX_SEARCH_RESULTS + 1);
-        if(count($results) === 0) {
+        if (count($results) === 0) {
             return $this->query->alert('Non ho trovato risultati!', true);
         }
         $this->user->saveSearch(SearchCategory::BY_INDEX);
         $text = null;
         $x = $y = 0;
-        $offset_back = GeneralConfigs::MAX_SEARCH_RESULTS - $offset;
-        $offset_next = GeneralConfigs::MAX_SEARCH_RESULTS + $offset;
+        $offset_back = $offset - GeneralConfigs::MAX_SEARCH_RESULTS;
+        $offset_next = $offset + GeneralConfigs::MAX_SEARCH_RESULTS;
         $emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
         foreach ($results as $key => $movie) {
             if ($key == GeneralConfigs::MAX_SEARCH_RESULTS) {
-                if($offset > 0) {
+                if ($offset > 0) {
                     $menu[] = [["text" => "«««", "callback_data" => "Search:byHistory|$offset_back"], ["text" => "»»»", "callback_data" => "Search:byHistory|$offset_next"]];
                 } else {
                     $menu[] = [["text" => "»»»", "callback_data" => "Search:byHistory|$offset_next"]];
@@ -118,7 +120,7 @@ class SearchController extends QueryController
             }
             $menu[$y][] = ["text" => $key, "callback_data" => "Movie:view|{$movie->getId()}|1"];
         }
-        if(count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1 && $offset > 0) {
+        if (count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1 && $offset > 0) {
             $menu[] = [["text" => "«««", "callback_data" => "Search:byHistory|$offset_back"]];
         }
         $text .= "Cronologia";
@@ -159,32 +161,33 @@ class SearchController extends QueryController
 
     public function byList($type)
     {
-        $menu[] = [["text" => "A", "callback_data" => "byListScroll|$type|a"], ["text" => "B", "callback_data" => "byListScroll|$type|b"], ["text" => "C", "callback_data" => "byListScroll|$type|c"], ["text" => "D", "callback_data" => "byListScroll|$type|d"]];
-        $menu[] = [["text" => "E", "callback_data" => "byListScroll|$type|e"], ["text" => "F", "callback_data" => "byListScroll|$type|f"], ["text" => "G", "callback_data" => "byListScroll|$type|g"], ["text" => "H", "callback_data" => "byListScroll|$type|h"]];
-        $menu[] = [["text" => "I", "callback_data" => "byListScroll|$type|i"], ["text" => "J", "callback_data" => "byListScroll|$type|j"], ["text" => "K", "callback_data" => "byListScroll|$type|k"], ["text" => "L", "callback_data" => "byListScroll|$type|l"]];
-        $menu[] = [["text" => "M", "callback_data" => "byListScroll|$type|m"], ["text" => "N", "callback_data" => "byListScroll|$type|n"], ["text" => "O", "callback_data" => "byListScroll|$type|o"], ["text" => "P", "callback_data" => "byListScroll|$type|p"]];
-        $menu[] = [["text" => "Q", "callback_data" => "byListScroll|$type|q"], ["text" => "R", "callback_data" => "byListScroll|$type|r"], ["text" => "S", "callback_data" => "byListScroll|$type|s"], ["text" => "T", "callback_data" => "byListScroll|$type|t"]];
-        $menu[] = [["text" => "U", "callback_data" => "byListScroll|$type|u"], ["text" => "V", "callback_data" => "byListScroll|$type|v"], ["text" => "W", "callback_data" => "byListScroll|$type|w"], ["text" => "X", "callback_data" => "byListScroll|$type|x"]];
-        $menu[] = [["text" => "Y", "callback_data" => "byListScroll|$type|y"], ["text" => "Z", "callback_data" => "byListScroll|$type|z"], ["text" => "#", "callback_data" => "byListScroll|$type|#"]];
+        $menu[] = [["text" => "A", "callback_data" => "Search:byListScroll|$type|a"], ["text" => "B", "callback_data" => "Search:byListScroll|$type|b"], ["text" => "C", "callback_data" => "Search:byListScroll|$type|c"], ["text" => "D", "callback_data" => "Search:byListScroll|$type|d"]];
+        $menu[] = [["text" => "E", "callback_data" => "Search:byListScroll|$type|e"], ["text" => "F", "callback_data" => "Search:byListScroll|$type|f"], ["text" => "G", "callback_data" => "Search:byListScroll|$type|g"], ["text" => "H", "callback_data" => "Search:byListScroll|$type|h"]];
+        $menu[] = [["text" => "I", "callback_data" => "Search:byListScroll|$type|i"], ["text" => "J", "callback_data" => "Search:byListScroll|$type|j"], ["text" => "K", "callback_data" => "Search:byListScroll|$type|k"], ["text" => "L", "callback_data" => "Search:byListScroll|$type|l"]];
+        $menu[] = [["text" => "M", "callback_data" => "Search:byListScroll|$type|m"], ["text" => "N", "callback_data" => "Search:byListScroll|$type|n"], ["text" => "O", "callback_data" => "Search:byListScroll|$type|o"], ["text" => "P", "callback_data" => "Search:byListScroll|$type|p"]];
+        $menu[] = [["text" => "Q", "callback_data" => "Search:byListScroll|$type|q"], ["text" => "R", "callback_data" => "Search:byListScroll|$type|r"], ["text" => "S", "callback_data" => "Search:byListScroll|$type|s"], ["text" => "T", "callback_data" => "Search:byListScroll|$type|t"]];
+        $menu[] = [["text" => "U", "callback_data" => "Search:byListScroll|$type|u"], ["text" => "V", "callback_data" => "Search:byListScroll|$type|v"], ["text" => "W", "callback_data" => "Search:byListScroll|$type|w"], ["text" => "X", "callback_data" => "Search:byListScroll|$type|x"]];
+        $menu[] = [["text" => "Y", "callback_data" => "Search:byListScroll|$type|y"], ["text" => "Z", "callback_data" => "Search:byListScroll|$type|z"], ["text" => "#", "callback_data" => "Search:byListScroll|$type|#"]];
         $menu[] = [["text" => get_button('it', 'back'), "callback_data" => "Search:selectType|byList"]];
         $this->query->alert();
         return $this->query->message->edit("[⤵️](#) *Seleziona un indice qua sotto ⤵️*", $menu);
     }
 
-    public function byListScroll($type, $index, $offset = 0) {
+    public function byListScroll($type, $index, $offset = 0)
+    {
         $results = $this->movieRepo->searchMoviesByIndexAndCategory($index, $type, $offset, GeneralConfigs::MAX_SEARCH_RESULTS + 1);
-        if(count($results) === 0) {
+        if (count($results) === 0) {
             return $this->query->alert('Non ho trovato risultati!', true);
         }
         $this->user->saveSearch(SearchCategory::BY_INDEX);
         $text = null;
         $x = $y = 0;
-        $offset_back = GeneralConfigs::MAX_SEARCH_RESULTS - $offset;
-        $offset_next = GeneralConfigs::MAX_SEARCH_RESULTS + $offset;
+        $offset_back = $offset - GeneralConfigs::MAX_SEARCH_RESULTS;
+        $offset_next = $offset + GeneralConfigs::MAX_SEARCH_RESULTS;
         $emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
         foreach ($results as $key => $movie) {
             if ($key == GeneralConfigs::MAX_SEARCH_RESULTS) {
-                if($offset > 0) {
+                if ($offset > 0) {
                     $menu[] = [["text" => "«««", "callback_data" => "Search:byListScroll|$index|$type|$offset_back"], ["text" => "»»»", "callback_data" => "Search:byListScroll|$index|$type|$offset_next"]];
                 } else {
                     $menu[] = [["text" => "»»»", "callback_data" => "Search:byListScroll|$index|$type|$offset_next"]];
@@ -200,7 +203,7 @@ class SearchController extends QueryController
             }
             $menu[$y][] = ["text" => $key, "callback_data" => "Movie:view|{$movie->getId()}|1"];
         }
-        if(count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1 && $offset > 0) {
+        if (count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1 && $offset > 0) {
             $menu[] = [["text" => "«««", "callback_data" => "Search:byListScroll|$index|$type|$offset_back"]];
         }
         $text .= "Risultati per indice « *$index* »";
@@ -210,14 +213,13 @@ class SearchController extends QueryController
 
     public function byYear($type, $index = 0)
     {
-        $webapp = GeneralConfigs::WEBAPP_URI. "/search/{$this->user->id}/year/$type";
         $next_index = $index + 10;
         $prev_index = $index - 10;
         $actual_year = (int)date("Y");
         $year = $actual_year - $index;
         $x = $y = 0;
         for ($i = $year; $i > $year - 12; $i--) {
-            if ($x  < 3) {
+            if ($x < 3) {
                 $x++;
             } else {
                 $y++;
@@ -237,23 +239,24 @@ class SearchController extends QueryController
         return $this->query->message->edit("*Seleziona l'anno per la ricerca*", $menu);
     }
 
-    public function byYearScroll($type, $index, $offset = 0) {
+    public function byYearScroll($type, $index, $offset = 0)
+    {
         $results = $this->movieRepo->searchMoviesByYearAndCategory($index, $type, $offset, GeneralConfigs::MAX_SEARCH_RESULTS + 1);
-        if(count($results) === 0) {
+        if (count($results) === 0) {
             return $this->query->alert('Non ho trovato risultati!', true);
         }
         $this->user->saveSearch(SearchCategory::BY_YEAR);
         $text = null;
         $x = $y = 0;
-        $offset_back = GeneralConfigs::MAX_SEARCH_RESULTS - $offset;
-        $offset_next = GeneralConfigs::MAX_SEARCH_RESULTS + $offset;
+        $offset_back = $offset - GeneralConfigs::MAX_SEARCH_RESULTS;
+        $offset_next = $offset + GeneralConfigs::MAX_SEARCH_RESULTS;
         $emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
         foreach ($results as $key => $movie) {
             if ($key == GeneralConfigs::MAX_SEARCH_RESULTS) {
-                if($offset > 0) {
-                    $menu[] = [["text" => "«««", "callback_data" => "Search:byIndexScroll|$index|$type|$offset_back"], ["text" => "»»»", "callback_data" => "Search:byIndexScroll|$index|$type|$offset_next"]];
+                if ($offset > 0) {
+                    $menu[] = [["text" => "«««", "callback_data" => "Search:byYearScroll|$index|$type|$offset_back"], ["text" => "»»»", "callback_data" => "Search:byYearScroll|$index|$type|$offset_next"]];
                 } else {
-                    $menu[] = [["text" => "»»»", "callback_data" => "Search:byIndexScroll|$index|$type|$offset_next"]];
+                    $menu[] = [["text" => "»»»", "callback_data" => "Search:byYearScroll|$index|$type|$offset_next"]];
                 }
                 continue;
             }
@@ -266,8 +269,8 @@ class SearchController extends QueryController
             }
             $menu[$y][] = ["text" => $key, "callback_data" => "Movie:view|{$movie->getId()}|1"];
         }
-        if(count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1 && $offset > 0) {
-            $menu[] = [["text" => "«««", "callback_data" => "Search:byIndexScroll|$index|$type|$offset_back"]];
+        if (count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1 && $offset > 0) {
+            $menu[] = [["text" => "«««", "callback_data" => "Search:byYearScroll|$index|$type|$offset_back"]];
         }
         $text .= "Risultati per anno « *$index* »";
         $menu[] = [["text" => get_button("it", "back"), "callback_data" => "Search:byYear|$type"]];
@@ -282,20 +285,21 @@ class SearchController extends QueryController
         return $this->query->message->edit("*Seleziona il numero di episodi per la ricerca*", $menu);
     }
 
-    public function byEpisodesScroll($min, $max, $offset = 0) {
+    public function byEpisodesScroll($min, $max, $offset = 0)
+    {
         $results = $this->movieRepo->searchMoviesByEpisodesNumber($min, $max, $offset, GeneralConfigs::MAX_SEARCH_RESULTS + 1);
-        if(count($results) === 0) {
+        if (count($results) === 0) {
             return $this->query->alert('Non ho trovato risultati!', true);
         }
         $this->user->saveSearch(SearchCategory::BY_EPISODES);
         $text = null;
         $x = $y = 0;
-        $offset_back = GeneralConfigs::MAX_SEARCH_RESULTS - $offset;
-        $offset_next = GeneralConfigs::MAX_SEARCH_RESULTS + $offset;
+        $offset_back = $offset - GeneralConfigs::MAX_SEARCH_RESULTS;
+        $offset_next = $offset + GeneralConfigs::MAX_SEARCH_RESULTS;
         $emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
         foreach ($results as $key => $movie) {
             if ($key == GeneralConfigs::MAX_SEARCH_RESULTS) {
-                if($offset > 0) {
+                if ($offset > 0) {
                     $menu[] = [["text" => "«««", "callback_data" => "Search:byEpisodesScroll|$min|$max|$offset_back"], ["text" => "»»»", "callback_data" => "Search:byEpisodesScroll|$min|$max|$offset_next"]];
                 } else {
                     $menu[] = [["text" => "»»»", "callback_data" => "Search:byEpisodesScroll|$min|$max|$offset_next"]];
@@ -311,7 +315,7 @@ class SearchController extends QueryController
             }
             $menu[$y][] = ["text" => $key, "callback_data" => "Movie:view|{$movie->getId()}|1"];
         }
-        if(count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1 && $offset > 0) {
+        if (count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1 && $offset > 0) {
             $menu[] = [["text" => "«««", "callback_data" => "Search:byEpisodesScroll|$min|$max|$offset_back"]];
         }
         $text .= "Risultati per « *$min ~ $max* »";
@@ -352,19 +356,20 @@ class SearchController extends QueryController
         return $this->query->message->edit("Seleziona i generi:", $menu);
     }
 
-    public function byGenresScroll($search_id, $category, $offset) {
+    public function byGenresScroll($search_id, $category, $offset)
+    {
         $results = $this->movieRepo->searchMoviesByGenresAndCategory($search_id, $category, $offset, GeneralConfigs::MAX_SEARCH_RESULTS + 1);
-        if(count($results) === 0) {
+        if (count($results) === 0) {
             return $this->query->alert('Non ho trovato risultati!', true);
         }
         $text = null;
         $x = $y = 0;
-        $offset_back = GeneralConfigs::MAX_SEARCH_RESULTS - $offset;
-        $offset_next = GeneralConfigs::MAX_SEARCH_RESULTS + $offset;
+        $offset_back = $offset - GeneralConfigs::MAX_SEARCH_RESULTS;
+        $offset_next = $offset + GeneralConfigs::MAX_SEARCH_RESULTS;
         $emoji = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
         foreach ($results as $key => $movie) {
             if ($key == GeneralConfigs::MAX_SEARCH_RESULTS) {
-                if($offset > 0) {
+                if ($offset > 0) {
                     $menu[] = [["text" => "«««", "callback_data" => "Search:byGenresScroll|$search_id|$category|$offset_back"], ["text" => "»»»", "callback_data" => "Search:byGenresScroll|$search_id|$category|$offset_next"]];
                 } else {
                     $menu[] = [["text" => "»»»", "callback_data" => "Search:byGenresScroll|$search_id|$category|$offset_next"]];
@@ -380,7 +385,7 @@ class SearchController extends QueryController
             }
             $menu[$y][] = ["text" => $key, "callback_data" => "Movie:view|{$movie->getId()}|1"];
         }
-        if(count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1 && $offset > 0) {
+        if (count($results) < GeneralConfigs::MAX_SEARCH_RESULTS + 1 && $offset > 0) {
             $menu[] = [["text" => "«««", "callback_data" => "Search:byGenresScroll|$search_id|$category|$offset_back"]];
         }
         $text .= "Risultati";

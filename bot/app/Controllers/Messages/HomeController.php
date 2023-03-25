@@ -2,18 +2,14 @@
 
 namespace superbot\App\Controllers\Messages;
 
+use superbot\App\Configs\Interfaces\GeneralConfigs;
 use superbot\App\Controllers\MessageController;
 use superbot\Telegram\Client;
-use superbot\App\Storage\Entities\Movie;
-use superbot\App\Storage\Repositories\GenreRepository;
-use superbot\App\Storage\Repositories\MovieRepository;
 use superbot\Telegram\Message;
 use superbot\App\Controllers\UserController;
 
 class HomeController extends MessageController
 {
-    private $movieRepo;
-    private $genreRepo;
     public function __construct(
         Message $message,
         UserController $user
@@ -28,6 +24,6 @@ class HomeController extends MessageController
         $this->message->delete();
         Client::editMessageText($this->user->id, $message_id, null, "Grazie per la richiesta ❤️", "html", null, false, $keyboard);
         $this->user->page();
-        Client::sendMessage(-865784147, "#RICHIESTA\n🗣 | {$this->user->mention}\n📝 | Movie richiesto: {$this->message->text}", 'Markdown');
+        Client::sendMessage(GeneralConfigs::GROUP_STAFF, "#RICHIESTA\n🗣 | {$this->user->mention}\n📝 | Movie richiesto: {$this->message->text}", 'Markdown');
     }
 }

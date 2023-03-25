@@ -17,8 +17,8 @@ use superbot\Telegram\Message;
 
 class CommandController extends MessageController
 {
-    private $movieRepo;
-    private $userRepo;
+    private MovieRepository $movieRepo;
+    private UserRepository $userRepo;
     private $cacheService;
     private $movieController;
     private $customizedRepo;

@@ -19,7 +19,7 @@ class Movie
     private ?int $season;
     private ?int $duration;
     private $topRank;
-    private $vote;
+    private ?float $vote;
     private ?int $totalVotes;
     private ?int $views;
     private ?int $viewOrder;
@@ -193,7 +193,7 @@ class Movie
         $this->vote = $vote;
     }
 
-    public function getScore(): ?int
+    public function getScore(): ?float
     {
         return $this->vote;
     }

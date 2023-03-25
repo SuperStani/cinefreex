@@ -36,7 +36,7 @@ $it = [
     ],
     "start" => "",
     "home" => [
-        "[👋](https://offertesh.it/netfluzmax/img/banners/Start.png) *Benvenuto/a *%s!",
+        "[👋](https://api.grouphelp.top/chelp/index.php?f=AgACAgQAAxkBBlgAASVkBPzYjbVnjohfJdPgfImtxFDmkgACSroxG2LxKVA3Cc3h3KQMjgEAAwIAA3kAAy4E) *Benvenuto/a *%s!",
         "",
         "👥 | *Iscritti:* %s",
         "🎞 | *Serie TV:* %s",
@@ -58,7 +58,7 @@ $it = [
         "",
         "⭐️ | <b>Score:</b> %s (%s utenti)",
         "👀 | <b>Visualizzazioni:</b> %s"
-        
+
     ],
     "film_template" => [
         "<b>Titolo:</b> %s",
@@ -87,12 +87,12 @@ $it = [
 
     "random_search" => "*✦ %s*\n━━━━━━━━━━━━\n🌟 | *Generi:* %s\n*📖 | Trama:* [Clicca qui](%s)",
     "search_home" => [
-        "[🔎](https://offertesh.it/netfluzmax/img/banners/Ricerca.png) *CERCA MOVIE*",
+        "[🔎](https://api.grouphelp.top/chelp/index.php?f=AgACAgQAAxkBBo8NQGQOAAGEAAGwllE0xz1EOe7eeBmj3aQAAny9MRvmKnFQ_hDIuLgJz1cBAAMCAAN5AAMvBA) *CERCA MOVIE*",
         "",
         "*PERFETTO, INVIAMI IL NOME\nDEL CONTENUTO CHE DESIDERI GUARDARE!*"
     ],
     "profile" => [
-        "[ℹ️](https://offertesh.it/netfluzmax/img/banners/Profilo.png) | *Informazioni profilo*",
+        "[ℹ️](https://api.grouphelp.top/chelp/index.php?f=AgACAgQAAxkBBlgPsmQE_xodR1AWyTCcHnSfI883KPc7AAJSujEbYvEpUJ9fV3LDwXnzAQADAgADeQADLgQ) | *Informazioni profilo*",
         "",
         "👤 | %s",
         "💮 | Serie Tv: *%s*",
@@ -128,12 +128,12 @@ $it = [
     ],
 
     "leadership" => [
-        "[🔝](https://offertesh.it/netfluzmax/img/banners/leadership.png)* | CLASSIFICA*",
+        "[🔝](https://api.grouphelp.top/chelp/index.php?f=AgACAgQAAxkBBlgN5GQE_ttlUEfPWmrhv3YqgKIcxZwAA1G6MRti8SlQzlSpewZMwk0BAAMCAAN5AAMuBA)* | CLASSIFICA*",
         "",
         "%s"
     ],
     "sponsor" => [
-        "*🔐 PER SBLOCCARE L'UTILIZZO DEL BOT ISCRIVITI AI CANALI QUI SOTTO ✅👇👇*"
+        "[🔐](https://api.grouphelp.top/chelp/index.php?f=AgACAgQAAxkBBlgQeWQE_ztjkznIVdSvNdX3gAqQKDDbAAJTujEbYvEpULJj7Ba98S2aAQADAgADeQADLgQ) *PER SBLOCCARE L'UTILIZZO DEL BOT ISCRIVITI AI CANALI QUI SOTTO ✅👇👇*"
     ],
 
     "channelFilm" => [

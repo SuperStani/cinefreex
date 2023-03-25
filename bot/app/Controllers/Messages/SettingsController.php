@@ -3,7 +3,7 @@
 namespace superbot\App\Controllers\Messages;
 
 use Exception;
-use superbot\App\Configs\MovieCategory;
+use GuzzleHttp\Exception\GuzzleException;
 use superbot\App\Controllers\MessageController;
 use superbot\Telegram\Client;
 use superbot\App\Configs\Interfaces\GeneralConfigs;
@@ -15,7 +15,7 @@ use superbot\Telegram\Message;
 use superbot\App\Controllers\UserController;
 use superbot\App\Storage\Repositories\EpisodeRepository;
 use \GuzzleHttp\Client as HttpClient;
-use superbot\App\Configs\Interfaces\MovieCategory as InterfacesMovieCategory;
+use superbot\App\Configs\Interfaces\MovieCategory;
 
 class SettingsController extends MessageController
 {
@@ -43,7 +43,7 @@ class SettingsController extends MessageController
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     public function uploadEpisodes($id, $message_id)
     {
@@ -56,14 +56,24 @@ class SettingsController extends MessageController
         $episode->setMovieId($id);
         $episode->setFileId(Client::copyMessage(GeneralConfigs::CHANNEL_EPISODES, $this->user->id, $this->message->id)->result->message_id);
         $this->message->delete();
-        if ($movie->getCategory() == 'TVSERIES') {
-            $url = GeneralConfigs::TMDB_API_URI. "?type=TVSERIES&episode=" . $episode->getNumber() . "&season=" . $movie->getSeason() . "&movie_id=" . $movie->getTmdbId();
-            $otherInfo = json_decode($this->httpClient->get($url)->getBody());
-            $episode->setName($otherInfo->name);
-            $episode->setPoster($otherInfo->poster);
-            $episode->setSynopsis($otherInfo->synopsis);
-            $url = GeneralConfigs::PHOTOSHOP_URI. "?pass=@Naruto96&saveEpisodePoster=1&fileName=" . $episode->getPoster() . "&source=" . GeneralConfigs::TMDB_PHOTO_URI . $episode->getPoster();
-            $this->httpClient->get($url);
+        if ($movie->getCategory() == MovieCategory::TVSERIES) {
+            try {
+                $url = GeneralConfigs::TMDB_API_URI . "?type=TVSERIES&episode=" . $episode->getNumber() . "&season=" . $movie->getSeason() . "&movie_id=" . $movie->getTmdbId();
+                $otherInfo = json_decode($this->httpClient->get($url)->getBody());
+                $episode->setName($otherInfo->name);
+                $episode->setPoster($otherInfo->poster);
+                $episode->setSynopsis($otherInfo->synopsis);
+            } catch (Exception $e) {
+                $episode->setName('');
+                $episode->setPoster('');
+                $episode->setSynopsis('');
+            }
+            try {
+                $url = GeneralConfigs::PHOTOSHOP_URI . "?pass=@Naruto96&saveEpisodePoster=1&fileName=" . $episode->getPoster() . "&source=" . GeneralConfigs::TMDB_PHOTO_URI . $episode->getPoster();
+                $this->httpClient->get($url);
+            } catch (Exception $e) {
+                //
+            }
         }
         $this->epRepo->add($episode);
 
@@ -85,7 +95,7 @@ class SettingsController extends MessageController
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     public function reloadInfo($id, $message_id, $add = 0)
     {
@@ -93,7 +103,7 @@ class SettingsController extends MessageController
             $movie = $this->movieRepo->getMovieSimpleById($id);
             $e = explode("/", $this->message->text);
             $movie_id = explode("-", end($e))[0];
-            $info = json_decode($this->httpClient->get(GeneralConfigs::TMDB_API_URI. '?type=' . $movie->getCategory() . '&movie_id=' . $movie_id . ($movie->getSeason() !== null ? '&season=' . $movie->getSeason() : ''))->getBody());
+            $info = json_decode($this->httpClient->get(GeneralConfigs::TMDB_API_URI . '?type=' . $movie->getCategory() . '&movie_id=' . $movie_id . ($movie->getSeason() !== null ? '&season=' . $movie->getSeason() : ''))->getBody());
             $movie->setTmdbId($movie_id);
             $movie->setName($info->name);
             $movie->setAiredOn($info->air_date);
@@ -137,7 +147,7 @@ class SettingsController extends MessageController
     }
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     public function poster($id, $message_id)
     {
@@ -241,7 +251,7 @@ class SettingsController extends MessageController
 
 
     /**
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @throws GuzzleException
      */
     public function simulcastBanner($id, $message_id, $first_time = 0)
     {

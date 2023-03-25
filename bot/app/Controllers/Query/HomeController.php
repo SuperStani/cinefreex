@@ -14,6 +14,10 @@ use superbot\App\Storage\Repositories\UserRepository;
 class HomeController extends QueryController
 {
 
+    private MovieRepository $movieRepo;
+    private UserRepository $userRepo;
+    private CacheService $cacheService;
+
     public function __construct(
         QueryUpdate $query,
         UserController $user,
@@ -35,12 +39,12 @@ class HomeController extends QueryController
         $this->user->page();
         if ($this->user->isAdmin()) {
             $menu[] = [["text" => "➕ ADD NEW MOVIE", "callback_data" => "Post:new"]];
-            $menu[] = [["text" => "📊 STATISTICHE", "web_app" => ["url" => GeneralConfigs::WEBAPP_URI . "/stats"]], ["text" => get_button('it', 'broadcast'), "callback_data" => "Home:broadcast"]];
+            $menu[] = [["text" => "📊 STATISTICHE", "callback_data" => "home:stats"], ["text" => get_button('it', 'broadcast'), "callback_data" => "Home:broadcast"]];
         }
         $menu[] = [["text" => get_button('it', 'watch_movie'), "callback_data" => "Simulcast:home"]];
         $menu[] = [["text" => "➖➖➖➖➖➖➖➖", "callback_data" => "Home:null"]];
         $menu[] = [["text" => get_button('it', 'requests'), "callback_data" => 'Home:request'], ["text" => get_button('it', 'profile'), "callback_data" => "Profile:me|0"]];
-        $menu[] = [["text" => get_button('it', 'tutorial'), "url" => "https://t.me/+FjXzQx6eStFhMDI8"], ["text" => get_button('it', 'feedbacks'), "url" => "t.me/NetfluzSegnalazioniBOT"]];
+        $menu[] = [["text" => get_button('it', 'tutorial'), "url" => "http://t.me/+OVs28KEk_2w5N2Jh"]];
         if (($text = $this->cacheService->getStartMessage()) === false) {
             $text = get_string(
                 'it',

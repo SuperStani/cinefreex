@@ -15,11 +15,11 @@ interface GeneralConfigs
     public const EPISODES_PHOTO_URI = "https://cinefreex.xohosting.it/cinefreex/img/episodes";
 
     public const BOT_OWNER = "";
-    public const CHANNEL_EPISODES = -1001660241298;
+    public const CHANNEL_EPISODES = -1001726095148;
+    public const GROUP_STAFF = -1001890514329;
     public const ADMINS = [
         406343901, //SuperStani
-        170172016,
-        545549685
+        5567828007
     ];
 
     public const MAX_SEARCH_RESULTS = 10;
